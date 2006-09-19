@@ -3,7 +3,7 @@
 
 
 #ifdef __RAD32__
-  #include "malloc.h"
+  #include <stdlib.h>
 
   #define radmalrad malloc
   #define radfrrad free
@@ -17,7 +17,7 @@
       #define radfree GlobalFreePtr
     #endif
   #else
-    #include "malloc.h"
+    #include <stdlib.h>
     #define radmalrad(num) _fmalloc((int)num)
     #define radfrrad _ffree
   #endif
