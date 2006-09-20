@@ -28,6 +28,7 @@ CFLAGS += -Wsequence-point
 CFLAGS += -Wwrite-strings
 
 CFLAGS += -DJA2
+CFLAGS += -D_DEBUG
 
 LDFLAGS += $(LDFLAGS_SDL)
 LDFLAGS += -lm
