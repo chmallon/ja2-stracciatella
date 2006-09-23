@@ -12451,7 +12451,21 @@ BOOLEAN Blt8BPPDataTo16BPPBufferHalf( UINT16 *pBuffer, UINT32 uiDestPitchBYTES, 
 	uiSrcSkip=(uiSrcPitch*2)-(usWidth&0xfffffffe);
 
 #if 1 // XXX TODO
-	UNIMPLEMENTED();
+	usHeight /= 2;
+	do
+	{
+		UINT32 w = usWidth / 2;
+		do
+		{
+			*(UINT16*)DestPtr = p16BPPPalette[*SrcPtr];
+			SrcPtr += 2;
+			DestPtr += 2;
+		}
+		while (--w > 0);
+		SrcPtr += uiSrcSkip;
+		DestPtr += LineSkip;
+	}
+	while (--usHeight > 0);
 #else
 	__asm {
 
@@ -13521,7 +13535,89 @@ BOOLEAN Blt8BPPDataTo16BPPBufferTransparentClip( UINT16 *pBuffer, UINT32 uiDestP
 	LineSkip=(uiDestPitchBYTES-(BlitLength*2));
 
 #if 1 // XXX TODO
-	UNIMPLEMENTED();
+	UINT32 LSCount;
+	UINT32 PxCount;
+
+	while (TopSkip > 0)
+	{
+		for (;;)
+		{
+			PxCount = *SrcPtr++;
+			if (PxCount & 0x80) continue;
+			if (PxCount == 0) break;
+			SrcPtr += PxCount;
+		}
+		TopSkip--;
+	}
+
+	do
+	{
+		for (LSCount = LeftSkip; LSCount > 0; LSCount -= PxCount)
+		{
+			PxCount = *SrcPtr++;
+			if (PxCount & 0x80)
+			{
+				PxCount &= 0x7F;
+				if (PxCount > LSCount)
+				{
+					PxCount -= LSCount;
+					LSCount = BlitLength;
+					goto BlitTransparent;
+				}
+			}
+			else
+			{
+				if (PxCount > LSCount)
+				{
+					SrcPtr += LSCount;
+					PxCount -= LSCount;
+					LSCount = BlitLength;
+					goto BlitNonTransLoop;
+				}
+				SrcPtr += PxCount;
+			}
+		}
+
+		LSCount = BlitLength;
+		while (LSCount > 0)
+		{
+			PxCount = *SrcPtr++;
+			if (PxCount & 0x80)
+			{
+BlitTransparent: // skip transparent pixels
+				PxCount &= 0x7F;
+				if (PxCount > LSCount) PxCount = LSCount;
+				LSCount -= PxCount;
+				DestPtr += 2 * PxCount;
+			}
+			else
+			{
+BlitNonTransLoop: // blit non-transparent pixels
+				if (PxCount > LSCount)
+				{
+					Unblitted = PxCount - LSCount;
+					PxCount = LSCount;
+				}
+				else
+				{
+					Unblitted = 0;
+				}
+				LSCount -= PxCount;
+
+				do
+				{
+					*(UINT16*)DestPtr = p16BPPPalette[*SrcPtr++];
+					DestPtr += 2;
+				}
+				while (--PxCount > 0);
+				SrcPtr += Unblitted;
+			}
+		}
+
+		while (*SrcPtr++ != 0) {} // skip along until we hit and end-of-line marker
+		DestPtr += LineSkip;
+	}
+	while (--BlitHeight > 0);
 #else
 	__asm {
 
