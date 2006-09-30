@@ -2,6 +2,7 @@ high prio
 - get tactical working
 
 med prio
+- HACK0000 find a clean solution for the \ problem, convert all pathes to /
 
 low prio
 - TODO0000 remove RestrictMouseCursor() et al.
