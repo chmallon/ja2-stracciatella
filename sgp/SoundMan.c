@@ -733,28 +733,6 @@ SOUNDPARMS spParms;
 }
 
 //*******************************************************************************
-// SoundRandomShouldPlay
-//
-//	Determines whether a random sound is ready for playing or not.
-//
-//	Returns:	TRUE if a the sample should be played.
-//
-//*******************************************************************************
-BOOLEAN SoundRandomShouldPlay(UINT32 uiSample)
-{
-UINT32 uiTicks;
-
-	uiTicks=GetTickCount();
-	if(pSampleList[uiSample].uiFlags&SAMPLE_RANDOM)
-		if(pSampleList[uiSample].uiTimeNext <= GetTickCount())
-			if(pSampleList[uiSample].uiInstances < pSampleList[uiSample].uiMaxInstances)
-				return(TRUE);
-
-	return(FALSE);
-}
-
-
-//*******************************************************************************
 // SoundStopAllRandom
 //
 //		This function should be polled by the application if random samples are
@@ -940,6 +918,10 @@ UINT32 uiCount;
 	return(TRUE);
 }
 
+
+static BOOLEAN SoundEmptyCache(void);
+
+
 //*******************************************************************************
 // SoundShutdownCache
 //
@@ -963,7 +945,7 @@ static BOOLEAN SoundShutdownCache(void)
 //	Returns: TRUE, always
 //
 //*******************************************************************************
-BOOLEAN SoundEmptyCache(void)
+static BOOLEAN SoundEmptyCache(void)
 {
 UINT32 uiCount;
 
@@ -1691,6 +1673,10 @@ UINT32 uiFilesize;
 	return(FALSE);
 }
 
+
+static BOOLEAN SoundSampleIsInUse(UINT32 uiSample);
+
+
 //*******************************************************************************
 // SoundStopIndex
 //
@@ -1787,7 +1773,7 @@ void SoundRemoveSampleFlags( UINT32 uiSample, UINT32 uiFlags )
 //	Returns:	TRUE if the sample index is currently being played by the system.
 //
 //*******************************************************************************
-BOOLEAN SoundSampleIsInUse(UINT32 uiSample)
+static BOOLEAN SoundSampleIsInUse(UINT32 uiSample)
 {
 UINT32 uiCount;
 
