@@ -12,8 +12,6 @@ extern "C" {
 #define		SAMPLE_ALLOCATED			0x00000001
 #define		SAMPLE_LOCKED					0x00000002
 #define		SAMPLE_RANDOM					0x00000004
-#define		SAMPLE_RANDOM_MANUAL	0x00000008
-#define		SAMPLE_3D							0x00000010
 
 
 // Sound error values (they're all the same)
@@ -69,7 +67,6 @@ extern UINT32		SoundPlayStreamedFile(const char *pFilename, SOUNDPARMS *pParms )
 
 extern UINT32		SoundPlayRandom(STR pFilename, RANDOMPARMS *pParms);
 extern BOOLEAN	SoundRandomShouldPlay(UINT32 uiSample);
-extern UINT32		SoundStartRandom(UINT32 uiSample);
 extern BOOLEAN	SoundServiceStreams(void);
 extern BOOLEAN	SoundServiceRandom(void);
 

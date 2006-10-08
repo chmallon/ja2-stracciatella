@@ -34,9 +34,6 @@
 // playing/random value to indicate default
 #define		SOUND_PARMS_DEFAULT		0xffffffff
 
-// Sound status flags
-#define		SOUND_CALLBACK				0x00000008
-
 
 // Struct definition for sample slots in the cache
 // Holds the regular sample data, as well as the data for the random samples
@@ -79,8 +76,6 @@ typedef struct
 	UINT32     uiFlags;
 	UINT32     uiSoundID;
 	UINT32     uiPriority;
-	void       (*pCallback)(UINT8*, UINT32, UINT32, UINT32, void*);
-	void*      pData;
 	void       (*EOSCallback)(void*);
 	void*      pCallbackData;
 	UINT32     uiTimeStamp;
@@ -654,6 +649,10 @@ static UINT32 SoundGetVolumeIndex(UINT32 uiChannel)
 }
 
 
+static BOOLEAN SoundRandomShouldPlay(UINT32 uiSample);
+static UINT32 SoundStartRandom(UINT32 uiSample);
+
+
 //*******************************************************************************
 // SoundServiceRandom
 //
@@ -673,11 +672,64 @@ UINT32 uiCount;
 
 	for(uiCount=0; uiCount < SOUND_MAX_CACHED; uiCount++)
 	{
-		if(!(pSampleList[uiCount].uiFlags&SAMPLE_RANDOM_MANUAL) && SoundRandomShouldPlay(uiCount))
+		if (SoundRandomShouldPlay(uiCount))
 			SoundStartRandom(uiCount);
 	}
 
 	return(FALSE);
+}
+
+//*******************************************************************************
+// SoundRandomShouldPlay
+//
+//	Determines whether a random sound is ready for playing or not.
+//
+//	Returns:	TRUE if a the sample should be played.
+//
+//*******************************************************************************
+static BOOLEAN SoundRandomShouldPlay(UINT32 uiSample)
+{
+UINT32 uiTicks;
+
+	uiTicks=GetTickCount();
+	if(pSampleList[uiSample].uiFlags&SAMPLE_RANDOM)
+		if(pSampleList[uiSample].uiTimeNext <= GetTickCount())
+			if(pSampleList[uiSample].uiInstances < pSampleList[uiSample].uiMaxInstances)
+				return(TRUE);
+
+	return(FALSE);
+}
+
+//*******************************************************************************
+// SoundStartRandom
+//
+//	Starts an instance of a random sample.
+//
+//	Returns:	TRUE if a new random sound was created, FALSE if nothing was done.
+//
+//*******************************************************************************
+static UINT32 SoundStartRandom(UINT32 uiSample)
+{
+UINT32 uiChannel, uiSoundID;
+SOUNDPARMS spParms;
+
+	if((uiChannel=SoundGetFreeChannel())!=SOUND_ERROR)
+	{
+		memset(&spParms, 0xff, sizeof(SOUNDPARMS));
+
+		spParms.uiVolume=pSampleList[uiSample].uiVolMin+Random(pSampleList[uiSample].uiVolMax-pSampleList[uiSample].uiVolMin);
+		spParms.uiPan=pSampleList[uiSample].uiPanMin+Random(pSampleList[uiSample].uiPanMax-pSampleList[uiSample].uiPanMin);
+		spParms.uiLoop=1;
+		spParms.uiPriority=pSampleList[uiSample].uiPriority;
+
+		if((uiSoundID=SoundStartSample(uiSample, uiChannel, &spParms))!=SOUND_ERROR)
+		{
+			pSampleList[uiSample].uiTimeNext=GetTickCount()+pSampleList[uiSample].uiTimeMin+Random(pSampleList[uiSample].uiTimeMax-pSampleList[uiSample].uiTimeMin);
+			pSampleList[uiSample].uiInstances++;
+			return(uiSoundID);
+		}
+	}
+	return(NO_SAMPLE);
 }
 
 //*******************************************************************************
@@ -701,38 +753,6 @@ UINT32 uiTicks;
 	return(FALSE);
 }
 
-//*******************************************************************************
-// SoundStartRandom
-//
-//	Starts an instance of a random sample.
-//
-//	Returns:	TRUE if a new random sound was created, FALSE if nothing was done.
-//
-//*******************************************************************************
-UINT32 SoundStartRandom(UINT32 uiSample)
-{
-UINT32 uiChannel, uiSoundID;
-SOUNDPARMS spParms;
-
-	if((uiChannel=SoundGetFreeChannel())!=SOUND_ERROR)
-	{
-		memset(&spParms, 0xff, sizeof(SOUNDPARMS));
-
-//		spParms.uiSpeed=pSampleList[uiSample].uiSpeedMin+Random(pSampleList[uiSample].uiSpeedMax-pSampleList[uiSample].uiSpeedMin);
-		spParms.uiVolume=pSampleList[uiSample].uiVolMin+Random(pSampleList[uiSample].uiVolMax-pSampleList[uiSample].uiVolMin);
-		spParms.uiPan=pSampleList[uiSample].uiPanMin+Random(pSampleList[uiSample].uiPanMax-pSampleList[uiSample].uiPanMin);
-		spParms.uiLoop=1;
-		spParms.uiPriority=pSampleList[uiSample].uiPriority;
-
-		if((uiSoundID=SoundStartSample(uiSample, uiChannel, &spParms))!=SOUND_ERROR)
-		{
-			pSampleList[uiSample].uiTimeNext=GetTickCount()+pSampleList[uiSample].uiTimeMin+Random(pSampleList[uiSample].uiTimeMax-pSampleList[uiSample].uiTimeMin);
-			pSampleList[uiSample].uiInstances++;
-			return(uiSoundID);
-		}
-	}
-	return(NO_SAMPLE);
-}
 
 //*******************************************************************************
 // SoundStopAllRandom
@@ -793,10 +813,7 @@ BOOLEAN SoundServiceStreams(void)
 #if 1 // XXX TODO
 	return FALSE;
 #else
-UINT32 uiCount, uiSpeed, uiBuffLen, uiBytesPerSample;
-UINT8		*pBuffer;
-void		*pData;
-
+UINT32 uiCount;
 
 	if(fSoundSystemInit)
 	{
@@ -804,18 +821,7 @@ void		*pData;
 		{
 			if(pSoundList[uiCount].hMSSStream!=NULL)
 			{
-				if(AIL_service_stream(pSoundList[uiCount].hMSSStream, 0))
-				{
-					if(pSoundList[uiCount].uiFlags&SOUND_CALLBACK)
-					{
-						uiSpeed=pSoundList[uiCount].hMSSStream->datarate;
-						uiBuffLen=pSoundList[uiCount].hMSSStream->bufsize;
-						pBuffer=pSoundList[uiCount].hMSSStream->bufs[pSoundList[uiCount].hMSSStream->buf1];
-						uiBytesPerSample=pSoundList[uiCount].hMSSStream->samp->format;
-						pData=pSoundList[uiCount].pData;
-						pSoundList[uiCount].pCallback(pBuffer, uiBuffLen, uiSpeed, uiBytesPerSample, pData);
-					}
-				}
+				AIL_service_stream(pSoundList[uiCount].hMSSStream, 0);
 			}
 
 			if (pSoundList[uiCount].hMSS || pSoundList[uiCount].hMSSStream)
