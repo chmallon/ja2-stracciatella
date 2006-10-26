@@ -89,7 +89,7 @@ typedef struct
 // Local Function Prototypes
 static BOOLEAN SoundInitCache(void);
 static BOOLEAN SoundShutdownCache(void);
-UINT32 SoundLoadSample(const char *pFilename);
+static UINT32 SoundLoadSample(const char* pFilename);
 static UINT32 SoundGetCached(const char* pFilename);
 static UINT32 SoundLoadDisk(const char* pFilename);
 
@@ -961,7 +961,7 @@ UINT32 uiCount;
 //	Returns: TRUE, always
 //
 //*******************************************************************************
-UINT32 SoundLoadSample(const char *pFilename)
+static UINT32 SoundLoadSample(const char* pFilename)
 {
 UINT32 uiSample=NO_SAMPLE;
 
