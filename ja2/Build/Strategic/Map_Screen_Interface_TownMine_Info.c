@@ -88,8 +88,8 @@ void AddInventoryButtonForMapPopUpBox( void );
 void RemoveInventoryButtonForMapPopUpBox( void );
 
 // callback to turn on sector invneotry list
-static void MapTownMineInventoryButtonCallBack(GUI_BUTTON *btn, INT32 reason);
-static void MapTownMineExitButtonCallBack(GUI_BUTTON *btn, INT32 reason);
+void MapTownMineInventoryButtonCallBack( GUI_BUTTON *btn, INT32 reason );
+void MapTownMineExitButtonCallBack( GUI_BUTTON *btn, INT32 reason );
 void MinWidthOfTownMineInfoBox( void );
 
 
@@ -844,32 +844,53 @@ void RemoveInventoryButtonForMapPopUpBox( void )
 }
 
 
-static void MapTownMineInventoryButtonCallBack(GUI_BUTTON *btn, INT32 reason)
+void MapTownMineInventoryButtonCallBack( GUI_BUTTON *btn, INT32 reason )
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
+	{
+	  btn->uiFlags|=(BUTTON_CLICKED_ON);
+	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
   {
-		fShowMapInventoryPool = TRUE;
-		fMapPanelDirty = TRUE;
-		fMapScreenBottomDirty = TRUE;
-		fShowTownInfo = FALSE;
-
-		//since we are bring up the sector inventory, check to see if the help screen should come up
-		if (ShouldTheHelpScreenComeUp(HELP_SCREEN_MAPSCREEN_SECTOR_INVENTORY, FALSE))
+    if (btn->uiFlags & BUTTON_CLICKED_ON)
 		{
-			//normally this is handled in the screen handler, we have to set up a little different this time around
-			ShouldTheHelpScreenComeUp(HELP_SCREEN_MAPSCREEN_SECTOR_INVENTORY, TRUE);
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
+
+			// done
+			fShowMapInventoryPool = TRUE;
+			fMapPanelDirty = TRUE;
+			fMapScreenBottomDirty = TRUE;
+			fShowTownInfo = FALSE;
+
+			//since we are bring up the sector inventory, check to see if the help screen should come up
+			if( ShouldTheHelpScreenComeUp( HELP_SCREEN_MAPSCREEN_SECTOR_INVENTORY, FALSE ) )
+			{
+				//normally this is handled in the screen handler, we have to set up a little different this time around
+				ShouldTheHelpScreenComeUp( HELP_SCREEN_MAPSCREEN_SECTOR_INVENTORY, TRUE );
+			}
 		}
 	}
 }
 
 
-static void MapTownMineExitButtonCallBack(GUI_BUTTON *btn, INT32 reason)
+void MapTownMineExitButtonCallBack( GUI_BUTTON *btn, INT32 reason )
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
+	{
+	  btn->uiFlags|=(BUTTON_CLICKED_ON);
+	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
   {
-		fMapPanelDirty = TRUE;
-		fMapScreenBottomDirty = TRUE;
-		fShowTownInfo = FALSE;
+    if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
+
+			// done
+			fMapPanelDirty = TRUE;
+			fMapScreenBottomDirty = TRUE;
+			fShowTownInfo = FALSE;
+
+		}
 	}
 }
 

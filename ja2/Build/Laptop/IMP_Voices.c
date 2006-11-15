@@ -58,9 +58,10 @@ void DestroyIMPVoiceMouseRegions( void );
 void RenderVoiceIndex( void );
 
 
-static void BtnIMPVoicesNextCallback(GUI_BUTTON *btn, INT32 reason);
-static void BtnIMPVoicesPreviousCallback(GUI_BUTTON *btn, INT32 reason);
-static void BtnIMPVoicesDoneCallback(GUI_BUTTON *btn, INT32 reason);
+// callbacks
+void BtnIMPVoicesNextCallback(GUI_BUTTON *btn,INT32 reason);
+void BtnIMPVoicesPreviousCallback(GUI_BUTTON *btn,INT32 reason);
+void BtnIMPVoicesDoneCallback(GUI_BUTTON *btn,INT32 reason);
 void IMPPortraitRegionButtonCallback(MOUSE_REGION * pRegion, INT32 iReason );
 
 void EnterIMPVoices( void )
@@ -249,58 +250,128 @@ void DestroyIMPVoicesButtons( void )
 }
 
 
-static void BtnIMPVoicesNextCallback(GUI_BUTTON *btn, INT32 reason)
+void BtnIMPVoicesNextCallback(GUI_BUTTON *btn,INT32 reason)
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+
+	// btn callback for IMP attrbite begin button
+	if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		IncrementVoice();
-		if (SoundIsPlaying(uiVocVoiceSound)) SoundStop(uiVocVoiceSound);
-		uiVocVoiceSound = PlayVoice();
-		fReDrawVoicesScreenFlag = TRUE;
+		 btn->uiFlags|=(BUTTON_CLICKED_ON);
 	}
-}
-
-
-static void BtnIMPVoicesPreviousCallback(GUI_BUTTON *btn, INT32 reason)
-{
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
 	{
-		DecrementVoice();
-		if (SoundIsPlaying(uiVocVoiceSound)) SoundStop(uiVocVoiceSound);
-		uiVocVoiceSound = PlayVoice();
-		fReDrawVoicesScreenFlag = TRUE;
-	}
-}
-
-
-static void BtnIMPVoicesDoneCallback(GUI_BUTTON *btn, INT32 reason)
-{
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
-	{
-		iCurrentImpPage = IMP_MAIN_PAGE;
-
-		// if we are already done, leave
-		if (iCurrentProfileMode == 5)
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
 		{
-			iCurrentImpPage = IMP_FINISH;
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
+
+			// next voice!!
+			IncrementVoice( );
+			// play voice
+			if( ! SoundIsPlaying( uiVocVoiceSound ) )
+			{
+        uiVocVoiceSound = PlayVoice( );
+			}
+			else
+			{
+				SoundStop( uiVocVoiceSound );
+				uiVocVoiceSound = PlayVoice( );
+			}
+
+
+			fReDrawVoicesScreenFlag = TRUE;
 		}
-		else if (iCurrentProfileMode < 4)
+	}
+}
+
+void BtnIMPVoicesPreviousCallback(GUI_BUTTON *btn,INT32 reason)
+{
+
+	// btn callback for IMP attrbite begin button
+	if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
+	{
+		 btn->uiFlags|=(BUTTON_CLICKED_ON);
+	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
 		{
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
+
+			// previous voice, please!!!
+			DecrementVoice( );
+			// play voice
+			if( ! SoundIsPlaying( uiVocVoiceSound ) )
+			{
+        uiVocVoiceSound = PlayVoice( );
+			}
+			else
+			{
+				SoundStop( uiVocVoiceSound );
+				uiVocVoiceSound = PlayVoice( );
+			}
+
+			fReDrawVoicesScreenFlag = TRUE;
+		}
+	}
+}
+
+void BtnIMPVoicesDoneCallback(GUI_BUTTON *btn,INT32 reason)
+{
+
+	// btn callback for IMP attrbite begin button
+	if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
+	{
+		 btn->uiFlags|=(BUTTON_CLICKED_ON);
+	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
+
+			// go to main page
+			iCurrentImpPage = IMP_MAIN_PAGE;
+
+			// if we are already done, leave
+	    if( iCurrentProfileMode == 5)
+			{
+	      iCurrentImpPage = IMP_FINISH;
+			}
+
 			// current mode now is voice
-			iCurrentProfileMode = 4;
-		}
-		else if (iCurrentProfileMode == 4)
-		{
-			// all done profiling
-			iCurrentProfileMode = 5;
-			iCurrentImpPage = IMP_FINISH;
-		}
+		  else if( iCurrentProfileMode < 4 )
+			{
+        iCurrentProfileMode = 4;
+			}
+			else if( iCurrentProfileMode == 4 )
+			{
+				// all done profiling
+				iCurrentProfileMode = 5;
+				iCurrentImpPage = IMP_FINISH;
+			}
 
-		// set voice id, to grab character slot
-		LaptopSaveInfo.iVoiceId = iCurrentVoices + (fCharacterIsMale ? 0 : 3);
+			// set voice id, to grab character slot
+      if( fCharacterIsMale == TRUE )
+			{
+				LaptopSaveInfo.iVoiceId = iCurrentVoices;
+			}
+			else
+			{
+				LaptopSaveInfo.iVoiceId = iCurrentVoices + 3;
+			}
 
-		// set button up image pending
-		fButtonPendingFlag = TRUE;
+			// set button up image  pending
+			fButtonPendingFlag = TRUE;
+		}
 	}
 }
 

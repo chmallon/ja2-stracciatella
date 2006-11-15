@@ -99,7 +99,7 @@ MOUSE_REGION		gIMPBeginScreenMouseRegions[ 4 ];
 // function definitions
 void CreateIMPBeginScreenButtons( void );
 void RemoveIMPBeginScreenButtons( void );
-static void BtnIMPBeginScreenDoneCallback(GUI_BUTTON *btn, INT32 reason);
+void BtnIMPBeginScreenDoneCallback(GUI_BUTTON *btn,INT32 reason);
 void GetPlayerKeyBoardInputForIMPBeginScreen( void );
 void HandleBeginScreenTextEvent( UINT32 uiKey );
 void DisplayFullNameStringCursor( void );
@@ -339,62 +339,80 @@ void RemoveIMPBeginScreenButtons( void )
 }
 
 
-static void BtnIMPBeginScreenDoneCallback(GUI_BUTTON *btn, INT32 reason)
+void BtnIMPBeginScreenDoneCallback(GUI_BUTTON *btn,INT32 reason)
 {
+
 	// easter egg check
 	BOOLEAN fEggOnYouFace = FALSE;
 
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	// btn callback for IMP Begin Screen done button
+	if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		if (fFinishedCharGeneration)
+		 btn->uiFlags|=(BUTTON_CLICKED_ON);
+	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
 		{
-			// simply reviewing name and gender, exit to finish page
-			iCurrentImpPage = IMP_FINISH;
-			fButtonPendingFlag = TRUE;
-			return;
-		}
-		else
-		{
-			if (CheckCharacterInputForEgg())
-			{
-				fEggOnYouFace = TRUE;
-			}
-		}
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
 
-		// back to mainpage
 
-		// check to see if a name has been selected, if not, do not allow player to proceed with more char generation
-		if (pFullNameString[0] != L'\0' && pFullNameString[0] != L' ' && bGenderFlag != -1)
-		{
-			// valid full name, check to see if nick name
-			if (pNickNameString[0] == '\0' || pNickNameString[0] == L' ')
+			if( fFinishedCharGeneration )
 			{
-				// no nick name
-				// copy first name to nick name
-				CopyFirstNameIntoNickName();
+				// simply reviewing name and gender, exit to finish page
+				iCurrentImpPage = IMP_FINISH;
+				fButtonPendingFlag = TRUE;
+				return;
 			}
-			// ok, now set back to main page, and set the fact we have completed part 1
-			if (iCurrentProfileMode < 1 && bGenderFlag != -1)
+			else
 			{
-				iCurrentProfileMode = 1;
+			  if( CheckCharacterInputForEgg( ) )
+				{
+					fEggOnYouFace = TRUE;
+				}
 			}
-			else if (bGenderFlag == -1)
+
+
+			// back to mainpage
+
+
+			// check to see if a name has been selected, if not, do not allow player to proceed with more char generation
+			if( ( pFullNameString[ 0 ] != 0) && ( pFullNameString[ 0 ] != L' ' ) && ( bGenderFlag != -1 ) )
 			{
+				// valid full name, check to see if nick name
+				if( ( pNickNameString[ 0 ] == 0 ) || ( pNickNameString[ 0 ] == L' '))
+				{
+					// no nick name
+					// copy first name to nick name
+          CopyFirstNameIntoNickName( );
+				}
+				// ok, now set back to main page, and set the fact we have completed part 1
+				if ( ( iCurrentProfileMode < 1 ) &&( bGenderFlag != -1 ) )
+				{
+				  iCurrentProfileMode = 1;
+				}
+				else if( bGenderFlag == -1 )
+				{
+					iCurrentProfileMode = 0;
+				}
+
+				// no easter egg?...then proceed along
+				if( fEggOnYouFace == FALSE )
+				{
+				  iCurrentImpPage = IMP_MAIN_PAGE;
+          fButtonPendingFlag = TRUE;
+				}
+
+			}
+			else
+			{
+				// invalid name, reset current mode
+				DoLapTopMessageBox( MSG_BOX_IMP_STYLE, pImpPopUpStrings[ 2 ], LAPTOP_SCREEN, MSG_BOX_FLAG_OK, NULL);
 				iCurrentProfileMode = 0;
 			}
-
-			// no easter egg?...then proceed along
-			if (!fEggOnYouFace)
-			{
-				iCurrentImpPage = IMP_MAIN_PAGE;
-				fButtonPendingFlag = TRUE;
-			}
-		}
-		else
-		{
-			// invalid name, reset current mode
-			DoLapTopMessageBox(MSG_BOX_IMP_STYLE, pImpPopUpStrings[2], LAPTOP_SCREEN, MSG_BOX_FLAG_OK, NULL);
-			iCurrentProfileMode = 0;
 		}
 	}
 }

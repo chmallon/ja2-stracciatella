@@ -291,6 +291,8 @@ void PlaceMessagesinPages();
 BOOLEAN	fFirstTime=TRUE;
 void EmailBtnCallBack(MOUSE_REGION * pRegion, INT32 iReason );
 void EmailMvtCallBack(MOUSE_REGION * pRegion, INT32 iReason );
+void PreviousRegionButtonCallback(GUI_BUTTON *btn,INT32 reason);
+void NextRegionButtonCallback(GUI_BUTTON *btn,INT32 reason);
 void SetUnNewMessages();
 INT32 DisplayEmailMessage(EmailPtr pMail);
 void AddDeleteRegionsToMessageRegion();
@@ -308,8 +310,12 @@ void DrawEmailMessageDisplayTitleText( INT32 iViewerY );
 void CreateMailScreenButtons( void );
 void DestroyMailScreenButtons( void );
 void DrawLineDividers( void );
-static void BtnPreviousEmailPageCallback(GUI_BUTTON *btn, INT32 reason);
-static void BtnNextEmailPageCallback(GUI_BUTTON *btn, INT32 reason);
+void FromCallback(GUI_BUTTON *btn, INT32 iReason );
+void SubjectCallback(GUI_BUTTON *btn,  INT32 iReason );
+void DateCallback(GUI_BUTTON *btn,  INT32 iReason );
+void ReadCallback(GUI_BUTTON *btn,  INT32 iReason );
+void BtnPreviousEmailPageCallback(GUI_BUTTON *btn,INT32 reason);
+void BtnNextEmailPageCallback(GUI_BUTTON *btn,INT32 reason);
 void DisplayEmailList();
 void ClearOutEmailMessageRecordsList( void );
 void AddEmailRecordToList( STR16 pString );
@@ -320,7 +326,7 @@ void HandleIMPCharProfileResultsMessage(  void );
 void HandleEmailViewerButtonStates( void );
 void SetUpIconForButton( void );
 void DeleteCurrentMessage( void );
-static void BtnDeleteCallback(GUI_BUTTON *btn, INT32 iReason);
+void BtnDeleteCallback(GUI_BUTTON *btn, INT32 iReason );
 void CreateNextPreviousEmailPageButtons( void );
 void UpdateStatusOfNextPreviousButtons( void );
 void DisplayWhichPageOfEmailProgramIsDisplayed( void );
@@ -1655,28 +1661,45 @@ void EmailMvtCallBack(MOUSE_REGION * pRegion, INT32 iReason )
 	}
 }
 
-
-static void BtnMessageXCallback(GUI_BUTTON *btn, INT32 reason)
+void BtnMessageXCallback(GUI_BUTTON *btn,INT32 reason)
 {
-  if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP || reason & MSYS_CALLBACK_REASON_RBUTTON_UP)
+	if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
+
+	if((reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )||(reason & MSYS_CALLBACK_REASON_RBUTTON_DWN))
 	{
-		// X button has been pressed and let up, this means to stop displaying the currently displayed message
 
-		// reset display message flag
-		fDisplayMessageFlag = FALSE;
+		btn->uiFlags |= BUTTON_CLICKED_ON;
 
-		// reset page being displayed
-		giMessagePage = 0;
-
-		// redraw icons
-		DrawLapTopIcons();
-
-		// force update of entire screen
-		fPausedReDrawScreenFlag = TRUE;
 	}
+  else if((reason & MSYS_CALLBACK_REASON_LBUTTON_UP )||(reason & MSYS_CALLBACK_REASON_RBUTTON_UP))
+	{
+
+		if(btn->uiFlags& BUTTON_CLICKED_ON)
+		{
+		 // X button has been pressed and let up, this means to stop displaying the currently displayed message
+
+     // reset display message flag
+     fDisplayMessageFlag=FALSE;
+
+		 // reset button flag
+		 btn->uiFlags &= ~BUTTON_CLICKED_ON;
+
+		 // reset page being displayed
+     giMessagePage = 0;
+
+		 // redraw icons
+		 DrawLapTopIcons();
+
+		 // force update of entire screen
+		 fPausedReDrawScreenFlag=TRUE;
+
+		 // rerender email
+		 //RenderEmail();
+		}
+	}
+
 }
-
-
 void
 SetUnNewMessages()
 {
@@ -1991,14 +2014,29 @@ INT32 DisplayEmailMessage(EmailPtr pMail)
 }
 
 
-static void BtnNewOkback(GUI_BUTTON *btn, INT32 reason)
+
+void BtnNewOkback(GUI_BUTTON *btn,INT32 reason)
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		fNewMailFlag=FALSE;
+		if(!(btn->uiFlags & BUTTON_CLICKED_ON))
+		{
+		}
+    btn->uiFlags|=(BUTTON_CLICKED_ON);
+	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if(btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+		 btn->uiFlags&=~(BUTTON_CLICKED_ON);
+		 fNewMailFlag=FALSE;
+
+		}
 	}
 }
-
 
 void AddDeleteRegionsToMessageRegion(INT32 iViewerY)
 {
@@ -2300,68 +2338,147 @@ void DetermineNextPrevPageDisplay( void )
 	}
 }
 
-
-static void NextRegionButtonCallback(GUI_BUTTON *btn, INT32 reason)
+void NextRegionButtonCallback(GUI_BUTTON *btn,INT32 reason )
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+
+  if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		// not on last page, move ahead one
-		if (iCurrentPage < iLastPage)
+		if(!(btn->uiFlags & BUTTON_CLICKED_ON))
 		{
-			iCurrentPage++;
-			fReDraw = TRUE;
-			RenderEmail();
-			MarkButtonsDirty();
 		}
+    btn->uiFlags|=(BUTTON_CLICKED_ON);
 	}
-}
-
-
-static void BtnPreviousEmailPageCallback(GUI_BUTTON *btn, INT32 reason)
-{
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
 	{
-		if (giMessagePage > 0) giMessagePage--;
+		if(btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+		  btn->uiFlags&=~(BUTTON_CLICKED_ON);
 
-		fReDraw = TRUE;
-		RenderEmail();
-		MarkButtonsDirty();
-  }
+		  // not on last page, move ahead one
+			if(iCurrentPage <iLastPage)
+			{
+				iCurrentPage++;
+				fReDraw=TRUE;
+				RenderEmail();
+				MarkButtonsDirty( );
+			}
+		}
+ }
+ else if (reason & MSYS_CALLBACK_REASON_RBUTTON_UP)
+ {
+  // nothing yet
+ }
+
 }
 
-
-static void BtnNextEmailPageCallback(GUI_BUTTON *btn, INT32 reason)
+void BtnPreviousEmailPageCallback(GUI_BUTTON *btn,INT32 reason)
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+  if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
+	{
+		if(!(btn->uiFlags & BUTTON_CLICKED_ON))
+		{
+		}
+    btn->uiFlags|=(BUTTON_CLICKED_ON);
+	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if(btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+			if( giMessagePage > 0 )
+			{
+				giMessagePage--;
+			}
+
+			btn->uiFlags&=~(BUTTON_CLICKED_ON);
+
+			fReDraw=TRUE;
+			RenderEmail();
+			MarkButtonsDirty( );
+		}
+  }
+  else if (reason & MSYS_CALLBACK_REASON_RBUTTON_UP)
+  {
+    // nothing yet
+  }
+
+}
+
+void BtnNextEmailPageCallback(GUI_BUTTON *btn,INT32 reason)
+{
+  if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
+	{
+		if(!(btn->uiFlags & BUTTON_CLICKED_ON))
+		{
+		}
+    btn->uiFlags|=(BUTTON_CLICKED_ON);
+	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
 	{
     // not on last page, move ahead one
-		if (giNumberOfPagesToCurrentEmail - 1 <= giMessagePage) return;
+		btn->uiFlags&=~(BUTTON_CLICKED_ON);
 
-    if (!fOnLastPageFlag)
+		if( ( giNumberOfPagesToCurrentEmail - 1 ) <= giMessagePage )
 		{
-			if (giNumberOfPagesToCurrentEmail - 1 > giMessagePage + 1)
+			return;
+		}
+
+    if( ! ( fOnLastPageFlag ) )
+		{
+			if( ( giNumberOfPagesToCurrentEmail - 1 ) > ( giMessagePage + 1 ) )
 				giMessagePage++;
 		}
 
-		MarkButtonsDirty();
+		MarkButtonsDirty( );
 		fReDrawScreenFlag = TRUE;
   }
+  else if (reason & MSYS_CALLBACK_REASON_RBUTTON_UP)
+  {
+    // nothing yet
+  }
+
 }
 
-
-static void PreviousRegionButtonCallback(GUI_BUTTON *btn, INT32 reason)
+void PreviousRegionButtonCallback(GUI_BUTTON *btn,INT32 reason)
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+ if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		// if we are not on forst page, more back one
-		if (iCurrentPage > 0)
+		if(!(btn->uiFlags & BUTTON_CLICKED_ON))
 		{
-			iCurrentPage--;
-			fReDraw = TRUE;
-			RenderEmail();
-			MarkButtonsDirty();
 		}
+    btn->uiFlags|=(BUTTON_CLICKED_ON);
 	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if(btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+		  btn->uiFlags&=~(BUTTON_CLICKED_ON);
+			// if we are not on forst page, more back one
+			if(iCurrentPage>0)
+			{
+				iCurrentPage--;
+				fReDraw=TRUE;
+				RenderEmail();
+				MarkButtonsDirty( );
+			}
+		}
+ }
+ else if (reason & MSYS_CALLBACK_REASON_RBUTTON_UP)
+ {
+  // nothing yet
+ }
+
 }
 
 
@@ -2626,65 +2743,130 @@ void DeleteEmail()
 }
 
 
-static void FromCallback(GUI_BUTTON *btn, INT32 iReason)
+
+void FromCallback(GUI_BUTTON *btn, INT32 iReason )
 {
-	if (iReason & MSYS_CALLBACK_REASON_LBUTTON_UP)
-	{
-		// sort messages based on sender name, then replace into pages of email
-		fSortSenderUpwards = !fSortSenderUpwards;
-		SortMessages(SENDER);
-		//SpecifyButtonIcon( giSortButton[1] , giArrowsForEmail, UINT16 usVideoObjectIndex,  INT8 bXOffset, INT8 bYOffset, TRUE );
-		fJustStartedEmail = FALSE;
-		PlaceMessagesinPages();
-	}
-}
-
-
-static void SubjectCallback(GUI_BUTTON *btn, INT32 iReason)
-{
-	if (iReason & MSYS_CALLBACK_REASON_LBUTTON_UP)
-	{
-		// sort message on subject and reorder list
-		fSortSubjectUpwards = !fSortSubjectUpwards;
-		SortMessages(SUBJECT);
-		fJustStartedEmail = FALSE;
-		PlaceMessagesinPages();
-	}
-}
-
-
-static void BtnDeleteCallback(GUI_BUTTON *btn, INT32 iReason)
-{
- if (iReason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+ if (iReason & MSYS_CALLBACK_REASON_INIT)
  {
+	return;
+ }
+ if(iReason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+ {
+
+  // sort messages based on sender name, then replace into pages of email
+	fSortSenderUpwards = !fSortSenderUpwards;
+
+  SortMessages(SENDER);
+
+	//SpecifyButtonIcon( giSortButton[1] , giArrowsForEmail, UINT16 usVideoObjectIndex,  INT8 bXOffset, INT8 bYOffset, TRUE );
+
+	fJustStartedEmail = FALSE;
+
+	PlaceMessagesinPages();
+  btn->uiFlags&= ~(BUTTON_CLICKED_ON);
+ }
+
+ else if (iReason & MSYS_CALLBACK_REASON_RBUTTON_UP)
+ {
+  // nothing yet
+ }
+
+}
+
+void SubjectCallback(GUI_BUTTON *btn, INT32 iReason )
+{
+ if (iReason & MSYS_CALLBACK_REASON_INIT)
+ {
+	return;
+ }
+ if(iReason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+ {
+  // sort message on subject and reorder list
+	fSortSubjectUpwards = !fSortSubjectUpwards;
+
+  SortMessages(SUBJECT);
+	fJustStartedEmail = FALSE;
+	PlaceMessagesinPages();
+
+
+
+	btn->uiFlags&= ~(BUTTON_CLICKED_ON);
+ }
+ else if (iReason & MSYS_CALLBACK_REASON_RBUTTON_UP)
+ {
+  // nothing yet
+ }
+
+}
+
+
+void BtnDeleteCallback(GUI_BUTTON *btn, INT32 iReason )
+{
+ if (iReason & MSYS_CALLBACK_REASON_INIT)
+ {
+	return;
+ }
+ if(iReason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+ {
+
+	 btn->uiFlags&= ~(BUTTON_CLICKED_ON);
 	 iDeleteId = giMessageId;
 	 fDeleteMailFlag = TRUE;
+
  }
+ else if (iReason & MSYS_CALLBACK_REASON_RBUTTON_UP)
+ {
+  // nothing yet
+ }
+
+}
+
+void DateCallback(GUI_BUTTON *btn, INT32 iReason )
+{
+ if (iReason & MSYS_CALLBACK_REASON_INIT)
+ {
+	return;
+ }
+ if(iReason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+ {
+  // sort messages based on date recieved and reorder lsit
+	fSortDateUpwards = !fSortDateUpwards;
+  SortMessages(RECEIVED);
+	PlaceMessagesinPages();
+
+	fJustStartedEmail = FALSE;
+
+	btn->uiFlags&= ~(BUTTON_CLICKED_ON);
+ }
+ else if (iReason & MSYS_CALLBACK_REASON_RBUTTON_UP)
+ {
+  // nothing yet
+ }
+
 }
 
 
-static void DateCallback(GUI_BUTTON *btn, INT32 iReason)
+void ReadCallback(GUI_BUTTON *btn, INT32 iReason )
 {
-	if (iReason & MSYS_CALLBACK_REASON_LBUTTON_UP)
-	{
-		// sort messages based on date recieved and reorder lsit
-		fSortDateUpwards = !fSortDateUpwards;
-		SortMessages(RECEIVED);
-		PlaceMessagesinPages();
-		fJustStartedEmail = FALSE;
-	}
-}
+ if (iReason & MSYS_CALLBACK_REASON_INIT)
+ {
+	return;
+ }
+ if(iReason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+ {
+  // sort messages based on date recieved and reorder lsit
+  SortMessages(READ);
+	PlaceMessagesinPages();
 
+	fJustStartedEmail = FALSE;
 
-static void ReadCallback(GUI_BUTTON *btn, INT32 iReason)
-{
-	if (iReason & MSYS_CALLBACK_REASON_LBUTTON_UP)
-	{
-		// sort messages based on date recieved and reorder lsit
-		SortMessages(READ);
-		PlaceMessagesinPages();
-		fJustStartedEmail = FALSE;
-	}
+	btn->uiFlags&= ~(BUTTON_CLICKED_ON);
+ }
+ else if (iReason & MSYS_CALLBACK_REASON_RBUTTON_UP)
+ {
+  // nothing yet
+ }
+
 }
 
 

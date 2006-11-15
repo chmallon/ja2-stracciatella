@@ -52,9 +52,12 @@ void CreatePersonalityFinishOkButton( void );
 void DestroyPersonalityFinishOkButton( void );
 
 
-static void BtnIMPPersonalityFinishYesCallback(GUI_BUTTON *btn, INT32 reason);
-static void BtnIMPPersonalityFinishNoCallback(GUI_BUTTON *btn, INT32 reason);
-static void BtnIMPPersonalityFinishOkCallback(GUI_BUTTON *btn, INT32 reason);
+
+// callbacks
+void BtnIMPPersonalityFinishYesCallback(GUI_BUTTON *btn,INT32 reason);
+void BtnIMPPersonalityFinishNoCallback(GUI_BUTTON *btn,INT32 reason);
+void BtnIMPPersonalityFinishOkCallback(GUI_BUTTON *btn,INT32 reason);
+
 
 
 void EnterIMPPersonalityFinish( void )
@@ -230,63 +233,93 @@ void DestroyIMPersonalityFinishButtons( void )
 }
 
 
-static void BtnIMPPersonalityFinishYesCallback(GUI_BUTTON *btn, INT32 reason)
+void BtnIMPPersonalityFinishYesCallback(GUI_BUTTON *btn,INT32 reason)
 {
-	// btn callback for IMP personality quiz answer button
 
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_DWN)
+	// btn callback for IMP personality quiz answer button
+	if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
+
+	if( reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
 		// confirm flag set, get out of HERE!
-	   if (fConfirmHasBeenSelectedFlag)
-		 {
-			 // now set this button off
-       btn->uiFlags&= ~BUTTON_CLICKED_ON;
-			 return;
-		 }
-	}
-	else if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
-	{
-		// set fact yes was selected
-		fConfirmIsYesFlag = TRUE;
-
-		// set fact that confirmation has been done
-		fConfirmHasBeenSelectedFlag = TRUE;
-
-		// now make skill, personality and attitude
-		CreatePlayersPersonalitySkillsAndAttitude();
-		fButtonPendingFlag = TRUE;
-		bPersonalityEndState = 1;
-	}
-}
-
-
-static void BtnIMPPersonalityFinishNoCallback(GUI_BUTTON *btn, INT32 reason)
-{
-	// btn callback for IMP personality quiz answer button
-
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_DWN)
-	{
-     // confirm flag set, get out of HERE!
-	   if (fConfirmHasBeenSelectedFlag)
+	   if( fConfirmHasBeenSelectedFlag )
 		 {
 			 // now set this button off
        btn->uiFlags&=~(BUTTON_CLICKED_ON);
+
 			 return;
 		 }
+
+		 btn->uiFlags|=(BUTTON_CLICKED_ON);
+
 	}
-	else if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	else if( reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
 	{
-		// set fact yes was selected
-		fConfirmIsYesFlag = FALSE;
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
 
-		// set fact that confirmation has been done
-		fConfirmHasBeenSelectedFlag = TRUE;
-		CreatePlayersPersonalitySkillsAndAttitude();
+		  // now set this button off
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
 
-		bPersonalityEndState = 2;
-		fButtonPendingFlag = TRUE;
+			// set fact yes was selected
+		  fConfirmIsYesFlag = TRUE;
+
+			// set fact that confirmation has been done
+			fConfirmHasBeenSelectedFlag = TRUE;
+
+			// now make skill, personality and attitude
+			CreatePlayersPersonalitySkillsAndAttitude( );
+			fButtonPendingFlag = TRUE;
+      bPersonalityEndState = 1;
+		}
 	}
 }
+
+
+
+void BtnIMPPersonalityFinishNoCallback(GUI_BUTTON *btn,INT32 reason)
+{
+
+	// btn callback for IMP personality quiz answer button
+	if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
+
+	if( reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
+	{
+     // confirm flag set, get out of HERE!
+	   if( fConfirmHasBeenSelectedFlag )
+		 {
+			 // now set this button off
+       btn->uiFlags&=~(BUTTON_CLICKED_ON);
+
+			 return;
+		 }
+
+		 btn->uiFlags|=(BUTTON_CLICKED_ON);
+
+	}
+	else if( reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+
+			// now set this button on
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
+
+			// set fact yes was selected
+		  fConfirmIsYesFlag = FALSE;
+
+			// set fact that confirmation has been done
+			fConfirmHasBeenSelectedFlag = TRUE;
+			CreatePlayersPersonalitySkillsAndAttitude( );
+
+      bPersonalityEndState = 2;
+			fButtonPendingFlag = TRUE;
+		}
+	}
+}
+
 
 
 void CreatePersonalityFinishOkButton( void )
@@ -316,19 +349,35 @@ void DestroyPersonalityFinishOkButton( void )
 }
 
 
-static void BtnIMPPersonalityFinishOkCallback(GUI_BUTTON *btn, INT32 reason)
+
+void BtnIMPPersonalityFinishOkCallback(GUI_BUTTON *btn,INT32 reason)
 {
+
 	// btn callback for IMP personality quiz answer button
+	if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
 
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	if( reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		if (iCurrentProfileMode < 2)
-		{
-			iCurrentProfileMode = 2;
-		}
 
-		// button pending, wait a frame
-		fButtonPendingFlag = TRUE;
-		iCurrentImpPage = IMP_MAIN_PAGE;
+		 btn->uiFlags|=(BUTTON_CLICKED_ON);
+
+	}
+	else if( reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+			// now set this button on
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
+
+			if( iCurrentProfileMode < 2 )
+			{
+				iCurrentProfileMode = 2;
+			}
+
+			// button pending, wait a frame
+			fButtonPendingFlag = TRUE;
+			iCurrentImpPage = IMP_MAIN_PAGE;
+		}
 	}
 }

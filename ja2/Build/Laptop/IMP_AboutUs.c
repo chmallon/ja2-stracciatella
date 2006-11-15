@@ -23,7 +23,8 @@ INT32 giIMPAboutUsButtonImage[1];
 void CreateIMPAboutUsButtons( void );
 void DeleteIMPAboutUsButtons( void );;
 
-static void BtnIMPBackCallback(GUI_BUTTON *btn, INT32 reason);
+// fucntions
+void BtnIMPBackCallback(GUI_BUTTON *btn,INT32 reason);
 
 
 void EnterIMPAboutUs( void )
@@ -112,11 +113,23 @@ void DeleteIMPAboutUsButtons( void )
 	return;
 }
 
-
-static void BtnIMPBackCallback(GUI_BUTTON *btn, INT32 reason)
+void BtnIMPBackCallback(GUI_BUTTON *btn,INT32 reason)
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+
+	// btn callback for IMP Homepage About US button
+	if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-     iCurrentImpPage = IMP_HOME_PAGE;
+		 btn->uiFlags|=(BUTTON_CLICKED_ON);
+	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
+      iCurrentImpPage = IMP_HOME_PAGE;
+		}
 	}
 }

@@ -179,9 +179,10 @@ BOOLEAN HandleSpecialFiles( UINT8 ubFormat );
 BOOLEAN HandleSpecialTerroristFile( INT32 iFileNumber, STR sPictureName );
 
 
-static void FilesBtnCallBack(MOUSE_REGION* pRegion, INT32 iReason);
-static void BtnPreviousFilePageCallback(GUI_BUTTON *btn, INT32 reason);
-static void BtnNextFilePageCallback(GUI_BUTTON *btn, INT32 reason);
+// callbacks
+void FilesBtnCallBack(MOUSE_REGION * pRegion, INT32 iReason );
+void BtnPreviousFilePageCallback(GUI_BUTTON *btn,INT32 reason);
+void BtnNextFilePageCallback(GUI_BUTTON *btn,INT32 reason);
 
 // file width manipulation
 void ClearOutWidthRecordsList( FileRecordWidthPtr pFileRecordWidthList );
@@ -751,34 +752,58 @@ void RemoveFilesMouseRegions( void )
 	}
 }
 
-
-static void FilesBtnCallBack(MOUSE_REGION* pRegion, INT32 iReason)
+void FilesBtnCallBack(MOUSE_REGION * pRegion, INT32 iReason )
 {
-	if (iReason & MSYS_CALLBACK_REASON_LBUTTON_UP)
-	{
-  	FilesUnitPtr pFilesList = pFilesListHead;
-		INT32 iFileId = MSYS_GetRegionUserData(pRegion, 0);
-		INT32 iCounter = 0;
+  INT32 iFileId = -1;
+	INT32 iCounter = 0;
+  FilesUnitPtr pFilesList=pFilesListHead;
 
-		// reset iHighLightListLine
-		iHighLightFileLine = -1;
 
-		if (iHighLightFileLine == iFileId) return;
+	if (iReason & MSYS_CALLBACK_REASON_INIT)
+  {
+	 return;
+  }
 
-		// make sure is a valid
-		while (pFilesList != NULL)
-		{
-			if (iCounter == iFileId)
-			{
-				giFilesPage = 0;
-				iHighLightFileLine = iFileId;
-			}
 
-			pFilesList = pFilesList->Next;
-			iCounter++;
-		}
-		fReDrawScreenFlag = TRUE;
-	}
+	if(iReason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+  {
+
+		// left button
+	 iFileId = MSYS_GetRegionUserData(pRegion, 0);
+
+	 // reset iHighLightListLine
+   iHighLightFileLine = -1;
+
+	 if( iHighLightFileLine == iFileId )
+	 {
+		 return;
+	 }
+
+
+	 // make sure is a valid
+	 while( pFilesList )
+   {
+
+		 // if iCounter = iFileId, is a valid file
+     if( iCounter == iFileId )
+		 {
+			 giFilesPage = 0;
+			 iHighLightFileLine = iFileId;
+		 }
+
+		 // next element in list
+		 pFilesList = pFilesList->Next;
+
+		 // increment counter
+		 iCounter++;
+	 }
+
+	 fReDrawScreenFlag=TRUE;
+
+
+	 return;
+  }
+
 }
 
 
@@ -1433,40 +1458,95 @@ void DeleteButtonsForFilesPage( void )
 }
 
 
-static void BtnPreviousFilePageCallback(GUI_BUTTON *btn, INT32 reason)
+// callbacks
+void BtnPreviousFilePageCallback(GUI_BUTTON *btn,INT32 reason)
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+  if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		if (fWaitAFrame) return;
 
-		if (giFilesPage > 0)
+		if( fWaitAFrame == TRUE )
 		{
-			giFilesPage--;
-			fWaitAFrame = TRUE;
-		}
-		fReDrawScreenFlag = TRUE;
-		MarkButtonsDirty();
-  }
-}
-
-
-static void BtnNextFilePageCallback(GUI_BUTTON *btn, INT32 reason)
-{
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
-	{
-		if (fWaitAFrame) return;
-
-		if (!fOnLastFilesPageFlag)
-		{
-			fWaitAFrame = TRUE;
-			giFilesPage++;
+			return;
 		}
 
-		fReDrawScreenFlag = TRUE;
-		MarkButtonsDirty();
+		if(!(btn->uiFlags & BUTTON_CLICKED_ON))
+		{
+			btn->uiFlags|=(BUTTON_CLICKED_ON);
+		}
+
 	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+
+		if( fWaitAFrame == TRUE )
+		{
+			return;
+		}
+
+		if((btn->uiFlags & BUTTON_CLICKED_ON))
+		{
+
+			if( giFilesPage > 0 )
+			{
+			 giFilesPage--;
+				fWaitAFrame = TRUE;
+			}
+
+			fReDrawScreenFlag = TRUE;
+			btn->uiFlags&=~(BUTTON_CLICKED_ON);
+			MarkButtonsDirty( );
+		}
+  }
+
+	return;
 }
 
+
+void BtnNextFilePageCallback(GUI_BUTTON *btn,INT32 reason)
+{
+  if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
+	{
+		if( fWaitAFrame == TRUE )
+		{
+			return;
+		}
+
+		if(!(btn->uiFlags & BUTTON_CLICKED_ON))
+		{
+			 btn->uiFlags|=(BUTTON_CLICKED_ON);
+		}
+
+	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if( fWaitAFrame == TRUE )
+		{
+			return;
+		}
+
+		if((btn->uiFlags & BUTTON_CLICKED_ON))
+		{
+
+			if(  ( fOnLastFilesPageFlag ) == FALSE )
+			{
+				fWaitAFrame = TRUE;
+				giFilesPage++;
+			}
+
+			fReDrawScreenFlag = TRUE;
+			btn->uiFlags&=~(BUTTON_CLICKED_ON);
+			MarkButtonsDirty( );
+		}
+	}
+
+	return;
+}
 
 void HandleFileViewerButtonStates( void )
 {

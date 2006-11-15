@@ -194,18 +194,18 @@ void DisplayCompressMode( void );
 void RemoveCompressModePause( void );
 void CreateCompressModePause( void );
 
-static void BtnLaptopCallback(GUI_BUTTON *btn, INT32 reason);
-static void BtnTacticalCallback(GUI_BUTTON *btn, INT32 reason);
-static void BtnOptionsFromMapScreenCallback(GUI_BUTTON *btn, INT32 reason);
+void BtnLaptopCallback(GUI_BUTTON *btn,INT32 reason);
+void BtnTacticalCallback( GUI_BUTTON *btn,INT32 reason );
+void BtnOptionsFromMapScreenCallback( GUI_BUTTON *btn, INT32 reason );
 
 void CompressModeClickCallback( MOUSE_REGION * pRegion, INT32 iReason );
 void CompressMaskClickCallback( MOUSE_REGION * pRegion, INT32 iReason );
 
-static void BtnTimeCompressMoreMapScreenCallback(GUI_BUTTON *btn, INT32 reason);
-static void BtnTimeCompressLessMapScreenCallback(GUI_BUTTON *btn, INT32 reason);
+void BtnTimeCompressMoreMapScreenCallback( GUI_BUTTON *btn,INT32 reason );
+void BtnTimeCompressLessMapScreenCallback( GUI_BUTTON *btn,INT32 reason );
 
-static void BtnMessageDownMapScreenCallback(GUI_BUTTON *btn, INT32 reason);
-static void BtnMessageUpMapScreenCallback(GUI_BUTTON *btn, INT32 reason);
+void BtnMessageDownMapScreenCallback( GUI_BUTTON *btn,INT32 reason );
+void BtnMessageUpMapScreenCallback( GUI_BUTTON *btn,INT32 reason );
 
 void MapScreenMessageScrollBarCallBack(MOUSE_REGION * pRegion, INT32 iReason );
 
@@ -496,64 +496,132 @@ void DestroyButtonsForMapScreenInterfaceBottom( void )
 }
 
 
-static void BtnLaptopCallback(GUI_BUTTON *btn, INT32 reason)
+void BtnLaptopCallback(GUI_BUTTON *btn,INT32 reason)
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_DWN)
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		if (IsMapScreenHelpTextUp()) StopMapScreenHelpText();
+		if( IsMapScreenHelpTextUp() )
+		{
+			// stop mapscreen text
+			StopMapScreenHelpText( );
+		}
+
 		// redraw region
-		if (btn->Area.uiFlags & MSYS_HAS_BACKRECT) fMapScreenBottomDirty = TRUE;
+		if( btn->Area.uiFlags & MSYS_HAS_BACKRECT )
+		{
+			fMapScreenBottomDirty = TRUE;
+		}
+
+	  btn->uiFlags|=(BUTTON_CLICKED_ON);
 	}
-	else if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
   {
-		if (IsMapScreenHelpTextUp()) StopMapScreenHelpText();
-		RequestTriggerExitFromMapscreen(MAP_EXIT_TO_LAPTOP);
+		if( IsMapScreenHelpTextUp() )
+		{
+			// stop mapscreen text
+			StopMapScreenHelpText( );
+		}
+
+    if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+			btn->uiFlags&=~(BUTTON_CLICKED_ON | BUTTON_DIRTY);
+			DrawButton( btn->IDNum );
+
+			RequestTriggerExitFromMapscreen( MAP_EXIT_TO_LAPTOP );
+	  }
 	}
-	else if (reason & MSYS_CALLBACK_REASON_RBUTTON_DWN)
+	else if(reason & MSYS_CALLBACK_REASON_RBUTTON_DWN )
 	{
-		if (IsMapScreenHelpTextUp()) StopMapScreenHelpText();
+		if( IsMapScreenHelpTextUp() )
+		{
+			// stop mapscreen text
+			StopMapScreenHelpText( );
+		}
 	}
 }
 
 
-static void BtnTacticalCallback(GUI_BUTTON *btn, INT32 reason)
+void BtnTacticalCallback( GUI_BUTTON *btn,INT32 reason )
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_DWN)
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		if (IsMapScreenHelpTextUp()) StopMapScreenHelpText();
+		if( IsMapScreenHelpTextUp() )
+		{
+			// stop mapscreen text
+			StopMapScreenHelpText( );
+			return;
+		}
+
 		// redraw region
-		if (btn->Area.uiFlags & MSYS_HAS_BACKRECT) fMapScreenBottomDirty = TRUE;
+		if( btn->Area.uiFlags & MSYS_HAS_BACKRECT )
+		{
+			fMapScreenBottomDirty = TRUE;
+		}
+
+	  btn->uiFlags|=(BUTTON_CLICKED_ON);
 	}
-	else if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
   {
-		RequestTriggerExitFromMapscreen(MAP_EXIT_TO_TACTICAL);
+   if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+			btn->uiFlags&=~(BUTTON_CLICKED_ON);
+
+			RequestTriggerExitFromMapscreen( MAP_EXIT_TO_TACTICAL );
+	  }
 	}
-	else if (reason & MSYS_CALLBACK_REASON_RBUTTON_DWN)
+	else if( reason & MSYS_CALLBACK_REASON_RBUTTON_DWN )
 	{
-		if (IsMapScreenHelpTextUp()) StopMapScreenHelpText();
+		if( IsMapScreenHelpTextUp() )
+		{
+			// stop mapscreen text
+			StopMapScreenHelpText( );
+			return;
+		}
 	}
 }
 
-
-static void BtnOptionsFromMapScreenCallback(GUI_BUTTON *btn, INT32 reason)
+void BtnOptionsFromMapScreenCallback( GUI_BUTTON *btn, INT32 reason )
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_DWN)
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		if (IsMapScreenHelpTextUp()) StopMapScreenHelpText( );
+
+		if( IsMapScreenHelpTextUp() )
+		{
+			// stop mapscreen text
+			StopMapScreenHelpText( );
+			return;
+		}
+
 		// redraw region
-		if (btn->uiFlags & MSYS_HAS_BACKRECT) fMapScreenBottomDirty = TRUE;
+		if( btn ->uiFlags & MSYS_HAS_BACKRECT )
+		{
+			fMapScreenBottomDirty = TRUE;
+		}
+
+	  btn->uiFlags|=(BUTTON_CLICKED_ON);
 	}
-	else if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
   {
-		fMapScreenBottomDirty = TRUE;
-		RequestTriggerExitFromMapscreen(MAP_EXIT_TO_OPTIONS);
+   if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+			btn->uiFlags&=~(BUTTON_CLICKED_ON);
+			fMapScreenBottomDirty = TRUE;
+
+			RequestTriggerExitFromMapscreen( MAP_EXIT_TO_OPTIONS );
+	  }
 	}
-	else if (reason & MSYS_CALLBACK_REASON_RBUTTON_DWN)
+	else if( reason & MSYS_CALLBACK_REASON_RBUTTON_DWN )
 	{
-		if (IsMapScreenHelpTextUp()) StopMapScreenHelpText();
+		if( IsMapScreenHelpTextUp() )
+		{
+			// stop mapscreen text
+			StopMapScreenHelpText( );
+			return;
+		}
 	}
 }
-
 
 void DrawNameOfLoadedSector( void )
 {
@@ -588,142 +656,271 @@ void CompressModeClickCallback( MOUSE_REGION * pRegion, INT32 iReason )
 }
 
 
-static void BtnTimeCompressMoreMapScreenCallback(GUI_BUTTON *btn, INT32 reason)
+void BtnTimeCompressMoreMapScreenCallback( GUI_BUTTON *btn,INT32 reason )
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_DWN)
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		if (CommonTimeCompressionChecks()) return;
+		if ( CommonTimeCompressionChecks() == TRUE )
+			return;
+
 		// redraw region
-		if (btn->uiFlags & MSYS_HAS_BACKRECT) fMapScreenBottomDirty = TRUE;
-	}
-	else if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
-  {
-		fMapScreenBottomDirty = TRUE;
-		RequestIncreaseInTimeCompression();
-	}
-	else if (reason & MSYS_CALLBACK_REASON_RBUTTON_DWN)
-	{
-		CommonTimeCompressionChecks();
-	}
-}
-
-
-static void BtnTimeCompressLessMapScreenCallback(GUI_BUTTON *btn, INT32 reason)
-{
-  if (reason & MSYS_CALLBACK_REASON_LBUTTON_DWN)
-	{
-		if (CommonTimeCompressionChecks()) return;
-		// redraw region
-		if (btn->uiFlags & MSYS_HAS_BACKRECT) fMapScreenBottomDirty = TRUE;
-	}
-	else if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
-  {
-		fMapScreenBottomDirty = TRUE;
-		RequestDecreaseInTimeCompression();
-	}
-	else if (reason & MSYS_CALLBACK_REASON_RBUTTON_DWN)
-	{
-		CommonTimeCompressionChecks();
-	}
-}
-
-
-static void BtnMessageDownMapScreenCallback(GUI_BUTTON *btn, INT32 reason)
-{
-	static INT32 iLastRepeatScrollTime = 0;
-
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_DWN)
-	{
-		if (IsMapScreenHelpTextUp()) StopMapScreenHelpText();
-		// redraw region
-		if (btn->uiFlags & MSYS_HAS_BACKRECT) fMapScreenBottomDirty = TRUE;
-	  iLastRepeatScrollTime = 0;
-	}
-	else if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
-  {
-		// redraw region
-		if (btn ->uiFlags & MSYS_HAS_BACKRECT) fMapScreenBottomDirty = TRUE;
-		MapScreenMsgScrollDown(1);
-	}
-	else if (reason & MSYS_CALLBACK_REASON_LBUTTON_REPEAT)
-	{
-		if (GetJA2Clock() - iLastRepeatScrollTime >= MESSAGE_BTN_SCROLL_TIME)
+		if( btn ->uiFlags & MSYS_HAS_BACKRECT )
 		{
-			MapScreenMsgScrollDown(1);
-		  iLastRepeatScrollTime = GetJA2Clock();
+			fMapScreenBottomDirty = TRUE;
 		}
+
+	  btn->uiFlags|=(BUTTON_CLICKED_ON);
 	}
-	else if (reason & MSYS_CALLBACK_REASON_RBUTTON_DWN)
-	{
-		if (IsMapScreenHelpTextUp()) StopMapScreenHelpText();
-		// redraw region
-		if (btn->uiFlags & MSYS_HAS_BACKRECT) fMapScreenBottomDirty = TRUE;
-	  iLastRepeatScrollTime = 0;
-	}
-	else if (reason & MSYS_CALLBACK_REASON_RBUTTON_UP)
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
   {
-		// redraw region
-		if (btn->uiFlags & MSYS_HAS_BACKRECT) fMapScreenBottomDirty = TRUE;
-		MapScreenMsgScrollDown(MAX_MESSAGES_ON_MAP_BOTTOM);
-	}
-	else if (reason & MSYS_CALLBACK_REASON_RBUTTON_REPEAT)
-	{
-		if (GetJA2Clock() - iLastRepeatScrollTime >= MESSAGE_BTN_SCROLL_TIME)
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
 		{
-			MapScreenMsgScrollDown(MAX_MESSAGES_ON_MAP_BOTTOM);
-		  iLastRepeatScrollTime = GetJA2Clock();
-		}
+			btn->uiFlags&=~(BUTTON_CLICKED_ON);
+			fMapScreenBottomDirty = TRUE;
+
+			RequestIncreaseInTimeCompression();
+	  }
+	}
+	else 	if(reason & MSYS_CALLBACK_REASON_RBUTTON_DWN )
+	{
+		if ( CommonTimeCompressionChecks() == TRUE )
+			return;
 	}
 }
 
 
-static void BtnMessageUpMapScreenCallback(GUI_BUTTON *btn, INT32 reason)
+
+void BtnTimeCompressLessMapScreenCallback( GUI_BUTTON *btn,INT32 reason )
+{
+
+  if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
+	{
+		if ( CommonTimeCompressionChecks() == TRUE )
+			return;
+
+		// redraw region
+		if( btn ->uiFlags & MSYS_HAS_BACKRECT )
+		{
+			fMapScreenBottomDirty = TRUE;
+		}
+
+	  btn->uiFlags|=(BUTTON_CLICKED_ON);
+	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+  {
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
+			fMapScreenBottomDirty = TRUE;
+
+			RequestDecreaseInTimeCompression();
+	  }
+	}
+	else 	if(reason & MSYS_CALLBACK_REASON_RBUTTON_DWN )
+	{
+		if ( CommonTimeCompressionChecks() == TRUE )
+			return;
+	}
+}
+
+
+
+void BtnMessageDownMapScreenCallback( GUI_BUTTON *btn,INT32 reason )
 {
 	static INT32 iLastRepeatScrollTime = 0;
 
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_DWN)
+	if( reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		if (IsMapScreenHelpTextUp()) StopMapScreenHelpText();
+		if( IsMapScreenHelpTextUp() )
+		{
+			// stop mapscreen text
+			StopMapScreenHelpText( );
+			return;
+		}
+
 		// redraw region
-		if (btn->Area.uiFlags & MSYS_HAS_BACKRECT) fMapScreenBottomDirty = TRUE;
+		if( btn ->uiFlags & MSYS_HAS_BACKRECT )
+		{
+			fMapScreenBottomDirty = TRUE;
+		}
+
+	  btn->uiFlags|=(BUTTON_CLICKED_ON);
+
 	  iLastRepeatScrollTime = 0;
 	}
-	else if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
   {
-		// redraw region
-		if (btn->uiFlags & MSYS_HAS_BACKRECT) fMapScreenBottomDirty = TRUE;
-		MapScreenMsgScrollUp(1);
-	}
-	else if (reason & MSYS_CALLBACK_REASON_LBUTTON_REPEAT)
-	{
-		if (GetJA2Clock() - iLastRepeatScrollTime >= MESSAGE_BTN_SCROLL_TIME)
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
 		{
-			MapScreenMsgScrollUp(1);
-		  iLastRepeatScrollTime = GetJA2Clock();
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
+
+			// redraw region
+			if( btn ->uiFlags & MSYS_HAS_BACKRECT )
+			{
+				fMapScreenBottomDirty = TRUE;
+			}
+
+			// down a line
+			MapScreenMsgScrollDown( 1 );
+	  }
+	}
+	else if( reason & MSYS_CALLBACK_REASON_LBUTTON_REPEAT )
+	{
+		if( GetJA2Clock() - iLastRepeatScrollTime >= MESSAGE_BTN_SCROLL_TIME )
+		{
+			// down a line
+			MapScreenMsgScrollDown( 1 );
+
+		  iLastRepeatScrollTime = GetJA2Clock( );
 		}
 	}
-	else if (reason & MSYS_CALLBACK_REASON_RBUTTON_DWN)
+	else if( reason & MSYS_CALLBACK_REASON_RBUTTON_DWN )
 	{
-		if (IsMapScreenHelpTextUp()) StopMapScreenHelpText();
+		if( IsMapScreenHelpTextUp() )
+		{
+			// stop mapscreen text
+			StopMapScreenHelpText( );
+			return;
+		}
+
 		// redraw region
-		if (btn->uiFlags & MSYS_HAS_BACKRECT) fMapScreenBottomDirty = TRUE;
+		if( btn ->uiFlags & MSYS_HAS_BACKRECT )
+		{
+			fMapScreenBottomDirty = TRUE;
+		}
+
+	  btn->uiFlags|=(BUTTON_CLICKED_ON);
+
 	  iLastRepeatScrollTime = 0;
 	}
-	else if (reason & MSYS_CALLBACK_REASON_RBUTTON_UP)
+	else if(reason & MSYS_CALLBACK_REASON_RBUTTON_UP )
   {
-		// redraw region
-		if (btn->uiFlags & MSYS_HAS_BACKRECT) fMapScreenBottomDirty = TRUE;
-		MapScreenMsgScrollUp(MAX_MESSAGES_ON_MAP_BOTTOM);
-	}
-	else if (reason & MSYS_CALLBACK_REASON_RBUTTON_REPEAT)
-	{
-		if (GetJA2Clock() - iLastRepeatScrollTime >= MESSAGE_BTN_SCROLL_TIME)
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
 		{
-			MapScreenMsgScrollUp(MAX_MESSAGES_ON_MAP_BOTTOM);
-		  iLastRepeatScrollTime = GetJA2Clock();
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
+
+			// redraw region
+			if( btn ->uiFlags & MSYS_HAS_BACKRECT )
+			{
+				fMapScreenBottomDirty = TRUE;
+			}
+
+			// down a page
+			MapScreenMsgScrollDown( MAX_MESSAGES_ON_MAP_BOTTOM );
+	  }
+	}
+	else if( reason & MSYS_CALLBACK_REASON_RBUTTON_REPEAT )
+	{
+		if( GetJA2Clock() - iLastRepeatScrollTime >= MESSAGE_BTN_SCROLL_TIME )
+		{
+			// down a page
+			MapScreenMsgScrollDown( MAX_MESSAGES_ON_MAP_BOTTOM );
+
+		  iLastRepeatScrollTime = GetJA2Clock( );
 		}
 	}
 }
+
+
+void BtnMessageUpMapScreenCallback( GUI_BUTTON *btn,INT32 reason )
+{
+	static INT32 iLastRepeatScrollTime = 0;
+
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
+	{
+		if( IsMapScreenHelpTextUp() )
+		{
+			// stop mapscreen text
+			StopMapScreenHelpText( );
+			return;
+		}
+
+	  btn->uiFlags|=(BUTTON_CLICKED_ON);
+
+	 // redraw region
+		if( btn->Area.uiFlags & MSYS_HAS_BACKRECT )
+		{
+			fMapScreenBottomDirty = TRUE;
+		}
+
+	  iLastRepeatScrollTime = 0;
+	}
+
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+  {
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+			btn->uiFlags&=~(BUTTON_CLICKED_ON);
+
+			// redraw region
+			if( btn ->uiFlags & MSYS_HAS_BACKRECT )
+			{
+				fMapScreenBottomDirty = TRUE;
+			}
+
+			// up a line
+			MapScreenMsgScrollUp( 1 );
+	  }
+	}
+	else if( reason & MSYS_CALLBACK_REASON_LBUTTON_REPEAT )
+	{
+		if( GetJA2Clock() - iLastRepeatScrollTime >= MESSAGE_BTN_SCROLL_TIME )
+		{
+			// up a line
+			MapScreenMsgScrollUp( 1 );
+
+		  iLastRepeatScrollTime = GetJA2Clock( );
+		}
+	}
+	else if( reason & MSYS_CALLBACK_REASON_RBUTTON_DWN )
+	{
+		if( IsMapScreenHelpTextUp() )
+		{
+			// stop mapscreen text
+			StopMapScreenHelpText( );
+			return;
+		}
+
+		// redraw region
+		if( btn ->uiFlags & MSYS_HAS_BACKRECT )
+		{
+			fMapScreenBottomDirty = TRUE;
+		}
+
+	  btn->uiFlags|=(BUTTON_CLICKED_ON);
+
+	  iLastRepeatScrollTime = 0;
+	}
+	else if(reason & MSYS_CALLBACK_REASON_RBUTTON_UP )
+  {
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
+
+			// redraw region
+			if( btn ->uiFlags & MSYS_HAS_BACKRECT )
+			{
+				fMapScreenBottomDirty = TRUE;
+			}
+
+			// up a page
+			MapScreenMsgScrollUp( MAX_MESSAGES_ON_MAP_BOTTOM );
+	  }
+	}
+	else if( reason & MSYS_CALLBACK_REASON_RBUTTON_REPEAT )
+	{
+		if( GetJA2Clock() - iLastRepeatScrollTime >= MESSAGE_BTN_SCROLL_TIME )
+		{
+			// up a page
+			MapScreenMsgScrollUp( MAX_MESSAGES_ON_MAP_BOTTOM );
+
+		  iLastRepeatScrollTime = GetJA2Clock( );
+		}
+	}
+}
+
 
 
 void EnableDisableMessageScrollButtonsAndRegions( void )

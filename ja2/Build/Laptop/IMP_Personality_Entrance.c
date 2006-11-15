@@ -27,7 +27,7 @@ INT32 giIMPPersonalityEntranceButtonImage[1];
 // function definitions
 void CreateIMPPersonalityEntranceButtons( void );
 void DestroyIMPPersonalityEntranceButtons( void );
-static void BtnIMPPersonalityEntranceDoneCallback(GUI_BUTTON *btn, INT32 reason);
+void BtnIMPPersonalityEntranceDoneCallback(GUI_BUTTON *btn,INT32 reason);
 
 
 void EnterIMPPersonalityEntrance( void )
@@ -107,14 +107,26 @@ void DestroyIMPPersonalityEntranceButtons( void )
 }
 
 
-static void BtnIMPPersonalityEntranceDoneCallback(GUI_BUTTON *btn, INT32 reason)
+void BtnIMPPersonalityEntranceDoneCallback(GUI_BUTTON *btn,INT32 reason)
 {
-	// btn callback for IMP Begin Screen done button
 
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	// btn callback for IMP Begin Screen done button
+	if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
+
+	if( reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		// done with begin screen, next screen
-		iCurrentImpPage = IMP_PERSONALITY_QUIZ;
-		fButtonPendingFlag = TRUE;
+		 btn->uiFlags|=(BUTTON_CLICKED_ON);
+
+	}
+	else if( reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
+		  // done with begin screen, next screen
+			iCurrentImpPage = IMP_PERSONALITY_QUIZ;
+		  fButtonPendingFlag = TRUE;
+		}
 	}
 }

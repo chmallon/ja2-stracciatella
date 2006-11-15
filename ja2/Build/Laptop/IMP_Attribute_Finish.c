@@ -32,8 +32,9 @@ void DestroyAttributeFinishButtons( void );
 extern void SetGeneratedCharacterAttributes( void );
 
 
-static void BtnIMPAttributeFinishYesCallback(GUI_BUTTON *btn, INT32 reason);
-static void BtnIMPAttributeFinishNoCallback(GUI_BUTTON *btn, INT32 reason);
+// callbacks
+void BtnIMPAttributeFinishYesCallback(GUI_BUTTON *btn,INT32 reason);
+void BtnIMPAttributeFinishNoCallback(GUI_BUTTON *btn,INT32 reason);
 
 
 void EnterIMPAttributeFinish( void )
@@ -136,36 +137,61 @@ void DestroyAttributeFinishButtons( void )
 }
 
 
-static void BtnIMPAttributeFinishYesCallback(GUI_BUTTON *btn, INT32 reason)
+void BtnIMPAttributeFinishYesCallback(GUI_BUTTON *btn,INT32 reason)
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
-	{
-		// gone far enough
-		iCurrentImpPage = IMP_MAIN_PAGE;
-		if (iCurrentProfileMode < 3)
-		{
-			iCurrentProfileMode = 3;
-		}
-		// if we are already done, leave
-		if (iCurrentProfileMode == 5)
-		{
-			iCurrentImpPage = IMP_FINISH;
-		}
 
-		// SET ATTRIBUTES NOW
-		SetGeneratedCharacterAttributes();
-		fButtonPendingFlag = TRUE;
+	// btn callback for IMP personality quiz answer button
+	if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
+
+  if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
+	{
+		 btn->uiFlags|=(BUTTON_CLICKED_ON);
+	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
+      // gone far enough
+		  iCurrentImpPage = IMP_MAIN_PAGE;
+		  if( iCurrentProfileMode < 3 )
+			{
+        iCurrentProfileMode = 3;
+			}
+		  // if we are already done, leave
+	    if( iCurrentProfileMode == 5)
+			{
+	      iCurrentImpPage = IMP_FINISH;
+			}
+
+			// SET ATTRIBUTES NOW
+			SetGeneratedCharacterAttributes( );
+			fButtonPendingFlag = TRUE;
+		}
 	}
 }
 
-
-static void BtnIMPAttributeFinishNoCallback(GUI_BUTTON *btn, INT32 reason)
+void BtnIMPAttributeFinishNoCallback(GUI_BUTTON *btn,INT32 reason)
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+
+	// btn callback for IMP personality quiz answer button
+	if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
+		 btn->uiFlags|=(BUTTON_CLICKED_ON);
+	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
 		// if no, return to attribute
 		iCurrentImpPage = IMP_ATTRIBUTE_PAGE;
 		fReturnStatus = TRUE;
 		fButtonPendingFlag = TRUE;
+		}
 	}
 }

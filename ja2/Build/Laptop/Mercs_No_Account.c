@@ -43,12 +43,12 @@ UINT32		guiNoAccountImage;
 
 
 // The Open Account Box button
-static void BtnOpenAccountBoxButtonCallback(GUI_BUTTON *btn, INT32 reason);
+void BtnOpenAccountBoxButtonCallback(GUI_BUTTON *btn,INT32 reason);
 UINT32	guiOpenAccountBoxButton;
 INT32		guiOpenAccountBoxButtonImage;
 
 // The Cancel Account Box button
-static void BtnCancelBoxButtonCallback(GUI_BUTTON *btn, INT32 reason);
+void BtnCancelBoxButtonCallback(GUI_BUTTON *btn,INT32 reason);
 UINT32	guiCancelBoxButton;
 
 
@@ -134,29 +134,64 @@ void RenderMercsNoAccount()
 }
 
 
-static void BtnOpenAccountBoxButtonCallback(GUI_BUTTON *btn, INT32 reason)
+void BtnOpenAccountBoxButtonCallback(GUI_BUTTON *btn,INT32 reason)
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		//open an account
-		LaptopSaveInfo.gubPlayersMercAccountStatus = MERC_ACCOUNT_VALID;
+		btn->uiFlags |= BUTTON_CLICKED_ON;
+		InvalidateRegion(btn->Area.RegionTopLeftX, btn->Area.RegionTopLeftY, btn->Area.RegionBottomRightX, btn->Area.RegionBottomRightY);
+	}
 
-		//Get an account number
-		LaptopSaveInfo.guiPlayersMercAccountNumber = Random(99999);
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+			btn->uiFlags &= (~BUTTON_CLICKED_ON );
 
-		gusMercVideoSpeckSpeech = SPECK_QUOTE_THANK_PLAYER_FOR_OPENING_ACCOUNT;
+			//open an account
+			LaptopSaveInfo.gubPlayersMercAccountStatus = MERC_ACCOUNT_VALID;
 
-		guiCurrentLaptopMode = LAPTOP_MODE_MERC;
-		gubArrivedFromMercSubSite = MERC_CAME_FROM_ACCOUNTS_PAGE;
+			//Get an account number
+			LaptopSaveInfo.guiPlayersMercAccountNumber = Random( 99999 );
+
+			gusMercVideoSpeckSpeech = SPECK_QUOTE_THANK_PLAYER_FOR_OPENING_ACCOUNT;
+
+			guiCurrentLaptopMode = LAPTOP_MODE_MERC;
+			gubArrivedFromMercSubSite = MERC_CAME_FROM_ACCOUNTS_PAGE;
+
+			InvalidateRegion(btn->Area.RegionTopLeftX, btn->Area.RegionTopLeftY, btn->Area.RegionBottomRightX, btn->Area.RegionBottomRightY);
+		}
+	}
+	if(reason & MSYS_CALLBACK_REASON_LOST_MOUSE)
+	{
+		btn->uiFlags &= (~BUTTON_CLICKED_ON );
+		InvalidateRegion(btn->Area.RegionTopLeftX, btn->Area.RegionTopLeftY, btn->Area.RegionBottomRightX, btn->Area.RegionBottomRightY);
 	}
 }
 
 
-static void BtnCancelBoxButtonCallback(GUI_BUTTON *btn, INT32 reason)
+void BtnCancelBoxButtonCallback(GUI_BUTTON *btn,INT32 reason)
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		guiCurrentLaptopMode = LAPTOP_MODE_MERC;
-		gubArrivedFromMercSubSite = MERC_CAME_FROM_ACCOUNTS_PAGE;
+		btn->uiFlags |= BUTTON_CLICKED_ON;
+		InvalidateRegion(btn->Area.RegionTopLeftX, btn->Area.RegionTopLeftY, btn->Area.RegionBottomRightX, btn->Area.RegionBottomRightY);
+	}
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+			btn->uiFlags &= (~BUTTON_CLICKED_ON );
+
+			guiCurrentLaptopMode = LAPTOP_MODE_MERC;
+			gubArrivedFromMercSubSite = MERC_CAME_FROM_ACCOUNTS_PAGE;
+
+			InvalidateRegion(btn->Area.RegionTopLeftX, btn->Area.RegionTopLeftY, btn->Area.RegionBottomRightX, btn->Area.RegionBottomRightY);
+		}
+	}
+	if(reason & MSYS_CALLBACK_REASON_LOST_MOUSE)
+	{
+		btn->uiFlags &= (~BUTTON_CLICKED_ON );
+		InvalidateRegion(btn->Area.RegionTopLeftX, btn->Area.RegionTopLeftY, btn->Area.RegionBottomRightX, btn->Area.RegionBottomRightY);
 	}
 }

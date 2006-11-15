@@ -150,12 +150,12 @@ MOUSE_REGION    gSelectedPolicyTocMenuRegion[ NUM_AIM_POLICY_TOC_BUTTONS ];
 void SelectPolicyTocMenuRegionCallBack(MOUSE_REGION * pRegion, INT32 iReason );
 
 //Agree/Disagree menu Buttons regions
-static void BtnPoliciesAgreeButtonCallback(GUI_BUTTON *btn, INT32 reason);
+void		BtnPoliciesAgreeButtonCallback(GUI_BUTTON *btn,INT32 reason);
 UINT32	guiPoliciesAgreeButton[ 2 ];
 INT32		guiPoliciesButtonImage;
 
 //Bottom Menu Buttons
-static void BtnPoliciesMenuButtonCallback(GUI_BUTTON *btn, INT32 reason);
+void		BtnPoliciesMenuButtonCallback(GUI_BUTTON *btn,INT32 reason);
 UINT32	guiPoliciesMenuButton[ AIM_POLICY_MENU_BUTTON_AMOUNT ];
 INT32		guiPoliciesMenuButtonImage;
 
@@ -170,6 +170,8 @@ BOOLEAN		gfInAgreementPage = FALSE;
 BOOLEAN		gfAimPolicyMenuBarLoaded = FALSE;
 UINT32		guiContentButton;
 BOOLEAN		gfExitingPolicesAgreeButton;
+UINT8			gubPoliciesAgreeButtonDown;
+UINT8			gubAimPolicyMenuButtonDown=255;
 BOOLEAN		gfExitingAimPolicy;
 BOOLEAN		AimPoliciesSubPagesVisitedFlag[NUM_AIM_POLICY_PAGES];
 
@@ -218,6 +220,9 @@ BOOLEAN EnterAimPolicies()
 
 	gfAimPolicyMenuBarLoaded = FALSE;
 	gfExitingAimPolicy = FALSE;
+
+	gubPoliciesAgreeButtonDown = 255;
+	gubAimPolicyMenuButtonDown	= 255;
 
 	if( gubCurPageNum != 0)
 		InitAimPolicyMenuBar();
@@ -711,84 +716,130 @@ UINT16 DisplayAimPolicySubParagraph(UINT16 usPosY, UINT8	ubPageNum, FLOAT fNumbe
 }
 
 
-static void BtnPoliciesAgreeButtonCallback(GUI_BUTTON *btn, INT32 reason)
+
+
+void BtnPoliciesAgreeButtonCallback(GUI_BUTTON *btn,INT32 reason)
 {
-	static BOOLEAN fOnPage = TRUE;
-
-	if (fOnPage)
+	UINT8	ubRetValue;
+	static BOOLEAN fOnPage=TRUE;
+	if(fOnPage)
 	{
-		if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+		ubRetValue = (UINT8)MSYS_GetBtnUserData( btn, 0 );
+		if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 		{
-			UINT8 ubRetValue = (UINT8)MSYS_GetBtnUserData(btn, 0);
+			btn->uiFlags |= BUTTON_CLICKED_ON;
+			InvalidateRegion(LAPTOP_SCREEN_UL_X,LAPTOP_SCREEN_WEB_UL_Y,LAPTOP_SCREEN_LR_X,LAPTOP_SCREEN_WEB_LR_Y);
+			gubPoliciesAgreeButtonDown = ubRetValue;
+		}
 
-			fOnPage = FALSE;
-			if (ubRetValue == 1)
+		if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+		{
+			if (btn->uiFlags & BUTTON_CLICKED_ON)
 			{
-				// Agree
-				gubCurPageNum++;
-				ChangingAimPoliciesSubPage(gubCurPageNum);
+				btn->uiFlags &= (~BUTTON_CLICKED_ON );
+
+				//Agree
+				fOnPage = FALSE;
+				if(ubRetValue == 1)
+				{
+					gubCurPageNum++;
+					ChangingAimPoliciesSubPage( gubCurPageNum );
+				}
+
+				//Disagree
+				else
+				{
+					guiCurrentLaptopMode = LAPTOP_MODE_AIM;
+				}
+				InvalidateRegion(LAPTOP_SCREEN_UL_X,LAPTOP_SCREEN_WEB_UL_Y,LAPTOP_SCREEN_LR_X,LAPTOP_SCREEN_WEB_LR_Y);
+				fOnPage = TRUE;
+				gubPoliciesAgreeButtonDown = 255;
 			}
-			else
-			{
-				// Disagree
-				guiCurrentLaptopMode = LAPTOP_MODE_AIM;
-			}
-			fOnPage = TRUE;
+		}
+		if(reason & MSYS_CALLBACK_REASON_LOST_MOUSE)
+		{
+			btn->uiFlags &= (~BUTTON_CLICKED_ON );
+			gubPoliciesAgreeButtonDown = 255;
+			InvalidateRegion(LAPTOP_SCREEN_UL_X,LAPTOP_SCREEN_WEB_UL_Y,LAPTOP_SCREEN_LR_X,LAPTOP_SCREEN_WEB_LR_Y);
 		}
 	}
 }
 
-
-static void BtnPoliciesMenuButtonCallback(GUI_BUTTON *btn, INT32 reason)
+void BtnPoliciesMenuButtonCallback(GUI_BUTTON *btn,INT32 reason)
 {
-	static BOOLEAN fOnPage = TRUE;
-
-	if (fOnPage)
+	UINT8	ubRetValue;
+	static BOOLEAN fOnPage=TRUE;
+	if(fOnPage)
 	{
-		if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+		ubRetValue = (UINT8)MSYS_GetBtnUserData( btn, 0 );
+		if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 		{
-			UINT8 ubRetValue = (UINT8)MSYS_GetBtnUserData(btn, 0);
+			btn->uiFlags |= BUTTON_CLICKED_ON;
+			gubAimPolicyMenuButtonDown	= ubRetValue;
+			InvalidateRegion(LAPTOP_SCREEN_UL_X,LAPTOP_SCREEN_WEB_UL_Y,LAPTOP_SCREEN_LR_X,LAPTOP_SCREEN_WEB_LR_Y);
+		}
 
-			switch (ubRetValue)
+		if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+		{
+			if (btn->uiFlags & BUTTON_CLICKED_ON)
 			{
-				case 0: // If previous Page
-					if (gubCurPageNum > 1)
+				btn->uiFlags &= (~BUTTON_CLICKED_ON );
+
+				gubAimPolicyMenuButtonDown	= 255;
+				//If previous Page
+				if( ubRetValue == 0 )
+				{
+					if( gubCurPageNum > 1)
 					{
 						gubCurPageNum--;
-						ChangingAimPoliciesSubPage(gubCurPageNum);
+						ChangingAimPoliciesSubPage( gubCurPageNum );
 					}
-					break;
+				}
 
-				case 1: // Home Page
+				// Home Page
+				else if( ubRetValue == 1 )
+				{
 					guiCurrentLaptopMode = LAPTOP_MODE_AIM;
-					break;
+				}
 
-				case 2: // Company policies index
-					if (gubCurPageNum != 1)
+				//Company policies index
+				else if( ubRetValue == 2 )
+				{
+					if( gubCurPageNum != 1 )
 					{
-						gubCurPageNum = 1;
-						ChangingAimPoliciesSubPage(gubCurPageNum);
+						gubCurPageNum=1;
+						ChangingAimPoliciesSubPage( gubCurPageNum );
 					}
-					break;
+				}
 
-				case 3: // Next Page
-					if (gubCurPageNum < NUM_AIM_POLICY_PAGES - 1)
+				//Next Page
+				else if( ubRetValue == 3 )
+				{
+					if( gubCurPageNum < NUM_AIM_POLICY_PAGES-1 )
 					{
 						gubCurPageNum++;
-						ChangingAimPoliciesSubPage(gubCurPageNum);
+						ChangingAimPoliciesSubPage( gubCurPageNum );
 
 						fOnPage = FALSE;
-						if (gfInPolicyToc)
+						if(gfInPolicyToc)
 						{
 							ExitAimPolicyTocMenu();
 						}
 						fOnPage = TRUE;
 					}
-					break;
+				}
+				InvalidateRegion(LAPTOP_SCREEN_UL_X,LAPTOP_SCREEN_WEB_UL_Y,LAPTOP_SCREEN_LR_X,LAPTOP_SCREEN_WEB_LR_Y);
+				ResetAimPolicyButtons();
+				DisableAimPolicyButton();
+				fOnPage = TRUE;
 			}
-			ResetAimPolicyButtons();
+		}
+		if(reason & MSYS_CALLBACK_REASON_LOST_MOUSE)
+		{
+			btn->uiFlags &= (~BUTTON_CLICKED_ON );
+			gubAimPolicyMenuButtonDown	= 255;
 			DisableAimPolicyButton();
-			fOnPage = TRUE;
+			InvalidateRegion(LAPTOP_SCREEN_UL_X,LAPTOP_SCREEN_WEB_UL_Y,LAPTOP_SCREEN_LR_X,LAPTOP_SCREEN_WEB_LR_Y);
 		}
 	}
 }

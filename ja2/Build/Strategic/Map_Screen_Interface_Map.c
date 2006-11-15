@@ -504,7 +504,7 @@ void MilitiaRegionMoveCallback( MOUSE_REGION *pRegion, INT32 iReason );
 void CreateDestroyMilitiaSectorButtons( void );
 void ShowHighLightedSectorOnMilitiaMap( void );
 void SetMilitiaMapButtonsText( void );
-static void MilitiaButtonCallback(GUI_BUTTON *btn, INT32 reason);
+void MilitiaButtonCallback(GUI_BUTTON *btn,INT32 reason);
 void DisplayUnallocatedMilitia( void );
 BOOLEAN IsThisMilitiaTownSectorAllowable( INT16 sSectorIndexValue );
 void DrawTownMilitiaName( void );
@@ -512,8 +512,8 @@ void HandleShutDownOfMilitiaPanelIfPeopleOnTheCursor( INT16 sTownValue );
 void HandleEveningOutOfTroopsAmongstSectors( void );
 void CreateMilitiaPanelBottomButton( void );
 void DeleteMilitiaPanelBottomButton( void );
-static void MilitiaDoneButtonCallback(GUI_BUTTON *btn, INT32 reason);
-static void MilitiaAutoButtonCallback(GUI_BUTTON *btn, INT32 reason);
+void MilitiaDoneButtonCallback(GUI_BUTTON *btn,INT32 reason);
+void MilitiaAutoButtonCallback(GUI_BUTTON *btn,INT32 reason);
 void RenderShadingForUnControlledSectors( void );
 void DrawTownMilitiaForcesOnMap( void );
 void CheckAndUpdateStatesOfSelectedMilitiaSectorButtons( void );
@@ -5642,24 +5642,50 @@ void SetMilitiaMapButtonsText( void )
 }
 
 
-static void MilitiaButtonCallback(GUI_BUTTON *btn, INT32 reason)
+void MilitiaButtonCallback(GUI_BUTTON *btn,INT32 reason)
 {
-	INT32 iValue = MSYS_GetBtnUserData(btn, 0);
+
+	INT16 sGlobalMapSector = 0;
+	INT16 sBaseSectorValue = 0;
+	INT32 iValue = 0;
+
+	// is the button enabled
+	if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
+
+	// get the value
+	iValue = MSYS_GetBtnUserData( btn, 0 );
 
 	// get the sector value for the upper left corner
-	INT16 sBaseSectorValue = GetBaseSectorForCurrentTown();
-	INT16 sGlobalMapSector = sBaseSectorValue + sSectorMilitiaMapSector % MILITIA_BOX_ROWS + sSectorMilitiaMapSector / MILITIA_BOX_ROWS * 16;
+	sBaseSectorValue = GetBaseSectorForCurrentTown( );
+	sGlobalMapSector = sBaseSectorValue + ( ( sSectorMilitiaMapSector % MILITIA_BOX_ROWS ) + ( sSectorMilitiaMapSector / MILITIA_BOX_ROWS ) * ( 16 ) );
 
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		DropAPersonInASector((UINT8)iValue, (INT16)(sGlobalMapSector % 16 + 1), (INT16)(sGlobalMapSector / 16 + 1));
+    btn->uiFlags|=(BUTTON_CLICKED_ON);
 	}
-	else if (reason & MSYS_CALLBACK_REASON_RBUTTON_UP)
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
 	{
-		PickUpATownPersonFromSector((UINT8)iValue, (INT16)(sGlobalMapSector % 16 + 1), (INT16)(sGlobalMapSector / 16 + 1));
+		if(btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+			btn->uiFlags&=~(BUTTON_CLICKED_ON);
+			DropAPersonInASector( ( UINT8 )( iValue ), ( INT16 )( ( sGlobalMapSector % 16 ) + 1 ), ( INT16 )( ( sGlobalMapSector / 16 ) + 1 )  );
+		}
+	}
+	else if(reason & MSYS_CALLBACK_REASON_RBUTTON_DWN )
+	{
+    btn->uiFlags|=(BUTTON_CLICKED_ON);
+	}
+	else if(reason & MSYS_CALLBACK_REASON_RBUTTON_UP )
+	{
+		if(btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+			btn->uiFlags&=~(BUTTON_CLICKED_ON);
+			PickUpATownPersonFromSector( ( UINT8 )( iValue ), ( INT16 )( ( sGlobalMapSector % 16 ) + 1 ), ( INT16 )( ( sGlobalMapSector / 16 ) + 1 )  );
+		}
 	}
 }
-
 
 void DisplayUnallocatedMilitia( void )
 {
@@ -6034,25 +6060,47 @@ void DeleteMilitiaPanelBottomButton( void )
 }
 
 
-static void MilitiaAutoButtonCallback(GUI_BUTTON *btn, INT32 reason)
+void MilitiaAutoButtonCallback(GUI_BUTTON *btn,INT32 reason)
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		// distribute troops over all the sectors under control
-		HandleEveningOutOfTroopsAmongstSectors();
-		fMapPanelDirty = TRUE;
+    btn->uiFlags|=(BUTTON_CLICKED_ON);
 	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if( btn->uiFlags & BUTTON_CLICKED_ON )
+		{
+			btn->uiFlags &= ~( BUTTON_CLICKED_ON );
+
+			// distribute troops over all the sectors under control
+			HandleEveningOutOfTroopsAmongstSectors( );
+			fMapPanelDirty = TRUE;
+		}
+	}
+
+	return;
 }
 
 
-static void MilitiaDoneButtonCallback(GUI_BUTTON *btn, INT32 reason)
+void MilitiaDoneButtonCallback(GUI_BUTTON *btn,INT32 reason)
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		// reset fact we are in the box
-		sSelectedMilitiaTown = 0;
-		fMapPanelDirty = TRUE;
+    btn->uiFlags|=(BUTTON_CLICKED_ON);
 	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if( btn->uiFlags & BUTTON_CLICKED_ON )
+		{
+			btn->uiFlags &= ~( BUTTON_CLICKED_ON );
+
+			// reset fact we are in the box
+			sSelectedMilitiaTown = 0;
+			fMapPanelDirty = TRUE;
+		}
+	}
+
+	return;
 }
 
 

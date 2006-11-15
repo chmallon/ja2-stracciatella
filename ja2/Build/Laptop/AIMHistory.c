@@ -63,6 +63,7 @@ UINT32		guiContentButton;
 
 UINT8			gubCurPageNum;
 BOOLEAN		gfInToc =  FALSE;
+UINT8			gubAimHistoryMenuButtonDown=255;
 BOOLEAN		gfExitingAimHistory;
 BOOLEAN		AimHistorySubPagesVisitedFlag[ NUM_AIM_HISTORY_PAGES ];
 
@@ -75,9 +76,10 @@ void DisableAimHistoryButton();
 MOUSE_REGION    gSelectedHistoryTocMenuRegion[ NUM_AIM_HISTORY_PAGES ];
 void SelectHistoryTocMenuRegionCallBack(MOUSE_REGION * pRegion, INT32 iReason );
 
-static void BtnHistoryMenuButtonCallback(GUI_BUTTON *btn, INT32 reason);
-static UINT32 guiHistoryMenuButton[AIM_HISTORY_MENU_BUTTON_AMOUNT];
-static INT32 guiHistoryMenuButtonImage;
+//Bottom Menu Buttons
+void		BtnHistoryMenuButtonCallback(GUI_BUTTON *btn,INT32 reason);
+UINT32	guiHistoryMenuButton[ AIM_HISTORY_MENU_BUTTON_AMOUNT ];
+INT32		guiHistoryMenuButtonImage;
 
 
 BOOLEAN DrawAimHistoryMenuBar(void);
@@ -146,6 +148,7 @@ BOOLEAN EnterAimHistory()
 
 
 	DisableAimHistoryButton();
+	gubAimHistoryMenuButtonDown	= 255;
 
 	return(TRUE);
 }
@@ -299,6 +302,65 @@ BOOLEAN ExitAimHistoryMenuBar(void)
 }
 
 
+void SelectHistoryMenuButtonsRegionCallBack(MOUSE_REGION * pRegion, INT32 iReason )
+{
+	UINT8	rValue;
+	static BOOLEAN fOnPage=TRUE;
+
+	if(fOnPage)
+	{
+		if (iReason & MSYS_CALLBACK_REASON_INIT)
+		{
+		}
+		else if(iReason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+		{
+			rValue = (UINT8)MSYS_GetRegionUserData( pRegion, 0 );
+			//Previous Page
+			if( rValue == 1 )
+			{
+				if( gubCurPageNum > 0)
+				{
+					gubCurPageNum--;
+					ChangingAimHistorySubPage( gubCurPageNum );
+//					RenderAimHistory();
+				}
+			}
+
+			// Home Page
+			else if( rValue == 2 )
+			{
+				guiCurrentLaptopMode = LAPTOP_MODE_AIM;
+			}
+			//Company policies
+			else if( rValue == 3 )
+			{
+				guiCurrentLaptopMode = LAPTOP_MODE_AIM_POLICIES;
+			}
+			//Next Page
+			else if( rValue == 4 )
+			{
+				if( gubCurPageNum < NUM_AIM_HISTORY_PAGES )
+				{
+					gubCurPageNum++;
+					ChangingAimHistorySubPage( gubCurPageNum );
+
+					fOnPage = FALSE;
+					if(gfInToc)
+					{
+						ExitTocMenu();
+					}
+					fOnPage = TRUE;
+//					RenderAimHistory();
+				}
+			}
+		}
+		else if (iReason & MSYS_CALLBACK_REASON_RBUTTON_UP)
+		{
+		}
+	}
+}
+
+
 BOOLEAN DisplayAimHistoryParagraph(UINT8	ubPageNum, UINT8 ubNumParagraphs)
 {
 	wchar_t	sText[400];
@@ -435,51 +497,81 @@ void SelectHistoryTocMenuRegionCallBack(MOUSE_REGION * pRegion, INT32 iReason )
 }
 
 
-static void BtnHistoryMenuButtonCallback(GUI_BUTTON *btn, INT32 reason)
+void BtnHistoryMenuButtonCallback(GUI_BUTTON *btn,INT32 reason)
 {
 	UINT8	ubRetValue = (UINT8)MSYS_GetBtnUserData( btn, 0 );
+	gubAimHistoryMenuButtonDown = 255;
 
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		ResetAimHistoryButtons();
+		btn->uiFlags |= BUTTON_CLICKED_ON;
 
-		switch (ubRetValue)
+		gubAimHistoryMenuButtonDown = ubRetValue;
+
+		InvalidateRegion(AIM_HISTORY_MENU_X,AIM_HISTORY_MENU_Y, AIM_HISTORY_MENU_END_X,AIM_HISTORY_MENU_END_Y);
+	}
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
 		{
-			case 1:
-				if (gubCurPageNum > 0)
-				{
-					gubCurPageNum--;
-					ChangingAimHistorySubPage(gubCurPageNum);
-					ResetAimHistoryButtons();
-				}
-				else
-				{
-					btn->uiFlags |= BUTTON_CLICKED_ON;
-				}
-				break;
+			btn->uiFlags &= (~BUTTON_CLICKED_ON );
+			ResetAimHistoryButtons();
 
-			case 2: // Home Page
-				guiCurrentLaptopMode = LAPTOP_MODE_AIM;
-				break;
-
-			case 3: //Company policies
-				guiCurrentLaptopMode = LAPTOP_MODE_AIM_MEMBERS_ARCHIVES;
-				break;
-
-			case 4: //Next Page
-				if (gubCurPageNum < NUM_AIM_HISTORY_PAGES)
+				if( ubRetValue == 1 )
 				{
-					gubCurPageNum++;
-					ChangingAimHistorySubPage(gubCurPageNum);
-					if (gfInToc) ExitTocMenu();
+					if( gubCurPageNum > 0)
+					{
+						gubCurPageNum--;
+						ChangingAimHistorySubPage( gubCurPageNum );
+
+//						RenderAimHistory();
+						ResetAimHistoryButtons();
+					}
+					else
+						btn->uiFlags |= (BUTTON_CLICKED_ON );
 				}
-				else
+
+				// Home Page
+				else if( ubRetValue == 2 )
 				{
-					btn->uiFlags |= BUTTON_CLICKED_ON;
+					guiCurrentLaptopMode = LAPTOP_MODE_AIM;
 				}
-				break;
+				//Company policies
+				else if( ubRetValue == 3 )
+				{
+					guiCurrentLaptopMode = LAPTOP_MODE_AIM_MEMBERS_ARCHIVES;
+				}
+				//Next Page
+				else if( ubRetValue == 4 )
+				{
+					if( gubCurPageNum < NUM_AIM_HISTORY_PAGES )
+					{
+						gubCurPageNum++;
+						ChangingAimHistorySubPage( gubCurPageNum );
+
+						if(gfInToc)
+						{
+							ExitTocMenu();
+						}
+//						RenderAimHistory();
+					}
+					else
+						btn->uiFlags |= (BUTTON_CLICKED_ON );
+
+				}
+
+			DisableAimHistoryButton();
+
+			InvalidateRegion(AIM_HISTORY_MENU_X,AIM_HISTORY_MENU_Y, AIM_HISTORY_MENU_END_X,AIM_HISTORY_MENU_END_Y);
 		}
+	}
+	if(reason & MSYS_CALLBACK_REASON_LOST_MOUSE)
+	{
+		btn->uiFlags &= (~BUTTON_CLICKED_ON );
+
 		DisableAimHistoryButton();
+
+		InvalidateRegion(AIM_HISTORY_MENU_X,AIM_HISTORY_MENU_Y, AIM_HISTORY_MENU_END_X,AIM_HISTORY_MENU_END_Y);
 	}
 }
 

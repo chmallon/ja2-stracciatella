@@ -80,10 +80,11 @@ void CancelAutoBandageCallBack( UINT8 bExitValue );
 void CreateTerminateAutoBandageButton( INT16 sX, INT16 sY );
 void DestroyTerminateAutoBandageButton( void );
 void DisplayAutoBandageUpdatePanel( void );
+void EndAutobandageButtonCallback(GUI_BUTTON *btn,INT32 reason);
 void SetUpAutoBandageUpdatePanel( void );
 BOOLEAN AddFacesToAutoBandageBox( void );
 BOOLEAN RenderSoldierSmallFaceForAutoBandagePanel( INT32 iIndex, INT16 sCurrentXPosition, INT16 sCurrentYPosition );
-static void StopAutoBandageButtonCallback(GUI_BUTTON *btn, INT32 reason);
+void StopAutoBandageButtonCallback(GUI_BUTTON *btn,INT32 reason);
 BOOLEAN RemoveFacesForAutoBandage( void );
 
 
@@ -991,13 +992,24 @@ void CreateTerminateAutoBandageButton( INT16 sX, INT16 sY )
 }
 
 
-static void StopAutoBandageButtonCallback(GUI_BUTTON *btn, INT32 reason)
+void StopAutoBandageButtonCallback(GUI_BUTTON *btn,INT32 reason)
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
-  {
-		fEndAutoBandage = TRUE;
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
+	{
+	  btn->uiFlags|=(BUTTON_CLICKED_ON);
 	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+  {
+    if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
+		  fEndAutoBandage = TRUE;
+		}
+	}
+
+	return;
 }
+
 
 
 void DestroyTerminateAutoBandageButton( void )

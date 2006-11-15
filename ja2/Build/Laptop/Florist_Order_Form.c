@@ -214,16 +214,16 @@ INT32		guiFlowerOrderButtonImage;
 
 UINT8		gubFlowerOrder_AdditioanalServicePrices[] = {10, 20, 10, 10};
 
-static void BtnFlowerOrderBackButtonCallback(GUI_BUTTON *btn, INT32 reason);
+void		BtnFlowerOrderBackButtonCallback(GUI_BUTTON *btn,INT32 reason);
 UINT32	guiFlowerOrderBackButton;
 
-static void BtnFlowerOrderSendButtonCallback(GUI_BUTTON *btn, INT32 reason);
+void		BtnFlowerOrderSendButtonCallback(GUI_BUTTON *btn,INT32 reason);
 UINT32	guiFlowerOrderSendButton;
 
-static void BtnFlowerOrderClearButtonCallback(GUI_BUTTON *btn, INT32 reason);
+void		BtnFlowerOrderClearButtonCallback(GUI_BUTTON *btn,INT32 reason);
 UINT32	guiFlowerOrderClearButton;
 
-static void BtnFlowerOrderGalleryButtonCallback(GUI_BUTTON *btn, INT32 reason);
+void		BtnFlowerOrderGalleryButtonCallback(GUI_BUTTON *btn,INT32 reason);
 UINT32	guiFlowerOrderGalleryButton;
 
 
@@ -612,61 +612,128 @@ void RenderFloristOrderForm()
 }
 
 
-static void BtnFlowerOrderBackButtonCallback(GUI_BUTTON *btn, INT32 reason)
+
+void BtnFlowerOrderBackButtonCallback(GUI_BUTTON *btn,INT32 reason)
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		guiCurrentLaptopMode = LAPTOP_MODE_FLORIST_FLOWER_GALLERY;
+		btn->uiFlags |= BUTTON_CLICKED_ON;
+		InvalidateRegion(btn->Area.RegionTopLeftX, btn->Area.RegionTopLeftY, btn->Area.RegionBottomRightX, btn->Area.RegionBottomRightY);
 	}
-}
-
-
-static void BtnFlowerOrderSendButtonCallback(GUI_BUTTON *btn, INT32 reason)
-{
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
 	{
-		//add an entry in the finacial page for the medical deposit
-		AddTransactionToPlayersBook(PURCHASED_FLOWERS, 0, GetWorldTotalMin(), -(INT32)guiFlowerPrice);
-
-		if (gubCurrentlySelectedFlowerLocation == 7)
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
 		{
-			// sent to meduna!
-			if (gfFLoristCheckBox0Down)
-			{
-				HandleFlowersMeanwhileScene(0);
-			}
-			else
-			{
-				HandleFlowersMeanwhileScene(1);
-			}
+			btn->uiFlags &= (~BUTTON_CLICKED_ON );
+
+			guiCurrentLaptopMode = LAPTOP_MODE_FLORIST_FLOWER_GALLERY;
+
+			InvalidateRegion(btn->Area.RegionTopLeftX, btn->Area.RegionTopLeftY, btn->Area.RegionBottomRightX, btn->Area.RegionBottomRightY);
 		}
-
-		//increment the order number
-		LaptopSaveInfo.uiFlowerOrderNumber += 1 + Random(2);
-
-		guiCurrentLaptopMode = LAPTOP_MODE_FLORIST;
-		InitFloristOrderForm();
+	}
+	if(reason & MSYS_CALLBACK_REASON_LOST_MOUSE)
+	{
+		btn->uiFlags &= (~BUTTON_CLICKED_ON );
+		InvalidateRegion(btn->Area.RegionTopLeftX, btn->Area.RegionTopLeftY, btn->Area.RegionBottomRightX, btn->Area.RegionBottomRightY);
 	}
 }
 
-
-static void BtnFlowerOrderClearButtonCallback(GUI_BUTTON *btn, INT32 reason)
+void BtnFlowerOrderSendButtonCallback(GUI_BUTTON *btn,INT32 reason)
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		guiCurrentLaptopMode = LAPTOP_MODE_FLORIST;
-		InitFloristOrderForm();
+		btn->uiFlags |= BUTTON_CLICKED_ON;
+		InvalidateRegion(btn->Area.RegionTopLeftX, btn->Area.RegionTopLeftY, btn->Area.RegionBottomRightX, btn->Area.RegionBottomRightY);
+	}
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+			btn->uiFlags &= (~BUTTON_CLICKED_ON );
+
+			//add an entry in the finacial page for the medical deposit
+			AddTransactionToPlayersBook(	PURCHASED_FLOWERS, 0, GetWorldTotalMin(), -(INT32)(guiFlowerPrice) );
+
+			if ( gubCurrentlySelectedFlowerLocation == 7 )
+			{
+				// sent to meduna!
+				if ( gfFLoristCheckBox0Down )
+				{
+					HandleFlowersMeanwhileScene( 0 );
+				}
+				else
+				{
+					HandleFlowersMeanwhileScene( 1 );
+				}
+			}
+
+			//increment the order number
+			LaptopSaveInfo.uiFlowerOrderNumber += ( 1 + Random( 2 ) );
+
+			guiCurrentLaptopMode = LAPTOP_MODE_FLORIST;
+			InitFloristOrderForm();
+
+			InvalidateRegion(btn->Area.RegionTopLeftX, btn->Area.RegionTopLeftY, btn->Area.RegionBottomRightX, btn->Area.RegionBottomRightY);
+		}
+	}
+	if(reason & MSYS_CALLBACK_REASON_LOST_MOUSE)
+	{
+		btn->uiFlags &= (~BUTTON_CLICKED_ON );
+		InvalidateRegion(btn->Area.RegionTopLeftX, btn->Area.RegionTopLeftY, btn->Area.RegionBottomRightX, btn->Area.RegionBottomRightY);
 	}
 }
 
-
-static void BtnFlowerOrderGalleryButtonCallback(GUI_BUTTON *btn, INT32 reason)
+void BtnFlowerOrderClearButtonCallback(GUI_BUTTON *btn,INT32 reason)
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		guiCurrentLaptopMode = LAPTOP_MODE_FLORIST_FLOWER_GALLERY;
-		//reset the gallery back to page 0
-		gubCurFlowerIndex = 0;
+		btn->uiFlags |= BUTTON_CLICKED_ON;
+		InvalidateRegion(btn->Area.RegionTopLeftX, btn->Area.RegionTopLeftY, btn->Area.RegionBottomRightX, btn->Area.RegionBottomRightY);
+	}
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+			btn->uiFlags &= (~BUTTON_CLICKED_ON );
+
+			guiCurrentLaptopMode = LAPTOP_MODE_FLORIST;
+			InitFloristOrderForm();
+
+			InvalidateRegion(btn->Area.RegionTopLeftX, btn->Area.RegionTopLeftY, btn->Area.RegionBottomRightX, btn->Area.RegionBottomRightY);
+		}
+	}
+	if(reason & MSYS_CALLBACK_REASON_LOST_MOUSE)
+	{
+		btn->uiFlags &= (~BUTTON_CLICKED_ON );
+		InvalidateRegion(btn->Area.RegionTopLeftX, btn->Area.RegionTopLeftY, btn->Area.RegionBottomRightX, btn->Area.RegionBottomRightY);
+	}
+}
+
+void BtnFlowerOrderGalleryButtonCallback(GUI_BUTTON *btn,INT32 reason)
+{
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
+	{
+		btn->uiFlags |= BUTTON_CLICKED_ON;
+		InvalidateRegion(btn->Area.RegionTopLeftX, btn->Area.RegionTopLeftY, btn->Area.RegionBottomRightX, btn->Area.RegionBottomRightY);
+	}
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+			btn->uiFlags &= (~BUTTON_CLICKED_ON );
+
+			guiCurrentLaptopMode = LAPTOP_MODE_FLORIST_FLOWER_GALLERY;
+
+			//reset the gallery back to page 0
+			gubCurFlowerIndex = 0;
+
+			InvalidateRegion(btn->Area.RegionTopLeftX, btn->Area.RegionTopLeftY, btn->Area.RegionBottomRightX, btn->Area.RegionBottomRightY);
+		}
+	}
+	if(reason & MSYS_CALLBACK_REASON_LOST_MOUSE)
+	{
+		btn->uiFlags &= (~BUTTON_CLICKED_ON );
+		InvalidateRegion(btn->Area.RegionTopLeftX, btn->Area.RegionTopLeftY, btn->Area.RegionBottomRightX, btn->Area.RegionBottomRightY);
 	}
 }
 

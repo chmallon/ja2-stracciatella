@@ -349,7 +349,7 @@ INT32 giMapInvDescButtonImage;
 INT32 giMapInvDescButton = -1;
 
 // the done descrition button callback
-static void ItemDescDoneButtonCallback(GUI_BUTTON *btn, INT32 reason);
+void ItemDescDoneButtonCallback( GUI_BUTTON *btn, INT32 reason );
 
 
 extern BOOLEAN fMapInventoryItem;
@@ -5659,18 +5659,39 @@ void ItemDescCallback( MOUSE_REGION * pRegion, INT32 iReason )
 	}
 }
 
-
-static void ItemDescDoneButtonCallback(GUI_BUTTON *btn, INT32 reason)
+void ItemDescDoneButtonCallback( GUI_BUTTON *btn, INT32 reason )
 {
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
+	{
+	  btn->uiFlags|=(BUTTON_CLICKED_ON);
+	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
   {
-		if (gpItemDescObject->usItem == MONEY) RemoveMoney();
-		DeleteItemDescriptionBox();
+    if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
+
+			if( gpItemDescObject->usItem == MONEY )
+			{
+				RemoveMoney();
+			}
+
+		  DeleteItemDescriptionBox( );
+		}
 	}
 
-	if (reason & MSYS_CALLBACK_REASON_RBUTTON_UP)
+	if(reason & MSYS_CALLBACK_REASON_RBUTTON_DWN )
+	{
+	  btn->uiFlags|=(BUTTON_CLICKED_ON);
+	}
+	else if(reason & MSYS_CALLBACK_REASON_RBUTTON_UP )
   {
-		DeleteItemDescriptionBox();
+    if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
+		  DeleteItemDescriptionBox( );
+		}
 	}
 }
 

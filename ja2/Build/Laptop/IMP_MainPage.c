@@ -45,12 +45,13 @@ UINT32 guiCHARACTERPORTRAITFORMAINPAGE;
 // function definitions
 void CreateIMPMainPageButtons( void );
 void DeleteIMPMainPageButtons( void );
-static void BtnIMPMainPageBackCallback(GUI_BUTTON *btn, INT32 reason);
-static void BtnIMPMainPageBeginCallback(GUI_BUTTON *btn, INT32 reason);
-static void BtnIMPMainPagePersonalityCallback(GUI_BUTTON *btn, INT32 reason);
-void BtnIMPMainPagePortraitCallback(GUI_BUTTON *btn, INT32 reason);
-static void BtnIMPMainPageAttributesCallback(GUI_BUTTON *btn, INT32 reason);
-void BtnIMPMainPageVoiceCallback(GUI_BUTTON *btn, INT32 reason);
+void BtnIMPMainPageBackCallback(GUI_BUTTON *btn,INT32 reason);
+void BtnIMPMainPageBeginCallback(GUI_BUTTON *btn,INT32 reason);
+void BtnIMPMainPagePersonalityCallback(GUI_BUTTON *btn,INT32 reason);
+void BtnIMPMainPagePortraitCallback(GUI_BUTTON *btn,INT32 reason);
+void BtnIMPMainPageAttributesCallback(GUI_BUTTON *btn,INT32 reason);
+void BtnIMPMainPagePortraitCallback(GUI_BUTTON *btn,INT32 reason);
+void BtnIMPMainPageVoiceCallback(GUI_BUTTON *btn,INT32 reason);
 void ShadeUnSelectableButtons( void );
 void UpDateIMPMainPageButtons( void );
 void BeginMessageBoxCallBack( UINT8 bExitValue );
@@ -322,129 +323,205 @@ void DeleteIMPMainPageButtons( void )
 	return;
 }
 
-
-static void BtnIMPMainPageBackCallback(GUI_BUTTON *btn, INT32 reason)
+void BtnIMPMainPageBackCallback(GUI_BUTTON *btn,INT32 reason)
 {
-	// btn callback for IMP Homepage About US button
 
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	// btn callback for IMP Homepage About US button
+	if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		iCurrentImpPage = IMP_HOME_PAGE;
-		fButtonPendingFlag = TRUE;
-		iCurrentProfileMode = 0;
-		fFinishedCharGeneration = FALSE;
-		ResetCharacterStats();
+		 btn->uiFlags|=(BUTTON_CLICKED_ON);
+	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
+      iCurrentImpPage = IMP_HOME_PAGE;
+			fButtonPendingFlag = TRUE;
+			iCurrentProfileMode = 0;
+			fFinishedCharGeneration = FALSE;
+		  ResetCharacterStats( );
+		}
 	}
 }
 
-
-static void BtnIMPMainPageBeginCallback(GUI_BUTTON *btn, INT32 reason)
+void BtnIMPMainPageBeginCallback(GUI_BUTTON *btn,INT32 reason)
 {
+
 	// btn callback for Main Page Begin Profiling
+
+
+	if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
 
 	// too far along to change gender
 
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		// are we going to change name, or do we have to start over from scratch
-		if (iCurrentProfileMode > 2)
+		 btn->uiFlags|=(BUTTON_CLICKED_ON);
+	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
 		{
-			// too far along, restart
-			DoLapTopMessageBox(MSG_BOX_IMP_STYLE, pImpPopUpStrings[1], LAPTOP_SCREEN, MSG_BOX_FLAG_YESNO, BeginMessageBoxCallBack);
-		}
-		else
-		{
-			if (LaptopSaveInfo.iCurrentBalance < COST_OF_PROFILE)
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
+
+			// are we going to change name, or do we have to start over from scratch
+			if( iCurrentProfileMode > 2 )
 			{
-				DoLapTopMessageBox(MSG_BOX_IMP_STYLE, pImpPopUpStrings[3], LAPTOP_SCREEN, MSG_BOX_FLAG_OK, BeginMessageBoxCallBack);
-			}
-			else if (NumberOfMercsOnPlayerTeam() >= 18)
-			{
-				DoLapTopMessageBox(MSG_BOX_IMP_STYLE, pImpPopUpStrings[5], LAPTOP_SCREEN, MSG_BOX_FLAG_OK, BeginMessageBoxCallBack);
+				// too far along, restart
+        DoLapTopMessageBox( MSG_BOX_IMP_STYLE, pImpPopUpStrings[ 1 ], LAPTOP_SCREEN, MSG_BOX_FLAG_YESNO, BeginMessageBoxCallBack);
+
 			}
 			else
 			{
-				// change name
-				iCurrentImpPage = IMP_BEGIN;
-				fButtonPendingFlag = TRUE;
+				if( LaptopSaveInfo.iCurrentBalance < COST_OF_PROFILE )
+				{
+					DoLapTopMessageBox( MSG_BOX_IMP_STYLE, pImpPopUpStrings[ 3 ], LAPTOP_SCREEN, MSG_BOX_FLAG_OK, BeginMessageBoxCallBack);
+
+				}
+				else if( NumberOfMercsOnPlayerTeam() >= 18 )
+				{
+					DoLapTopMessageBox( MSG_BOX_IMP_STYLE, pImpPopUpStrings[ 5 ], LAPTOP_SCREEN, MSG_BOX_FLAG_OK, BeginMessageBoxCallBack);
+				}
+				else
+				{
+				  // change name
+          iCurrentImpPage = IMP_BEGIN;
+				  fButtonPendingFlag = TRUE;
+        }
 			}
+
 		}
 	}
 }
 
 
-static void BtnIMPMainPagePersonalityCallback(GUI_BUTTON *btn, INT32 reason)
+void BtnIMPMainPagePersonalityCallback(GUI_BUTTON *btn,INT32 reason)
 {
+
 	// btn callback for Main Page Begin Profiling
 
+	if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
+
   // if not this far in char generation, don't alot ANY action
-	if (iCurrentProfileMode != 1)
+	if( iCurrentProfileMode != 1 )
 	{
-		btn->uiFlags &= ~BUTTON_CLICKED_ON;
+		btn->uiFlags&=~(BUTTON_CLICKED_ON);
 		return;
 	}
 
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		iCurrentImpPage = IMP_PERSONALITY;
-		fButtonPendingFlag = TRUE;
+		 btn->uiFlags|=(BUTTON_CLICKED_ON);
+	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
+      iCurrentImpPage = IMP_PERSONALITY;
+			fButtonPendingFlag = TRUE;
+		}
+	}
+}
+
+void BtnIMPMainPageAttributesCallback(GUI_BUTTON *btn,INT32 reason)
+{
+
+	// btn callback for Main Page Begin Profiling
+
+	if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
+  // if not this far in char generation, don't alot ANY action
+	if( iCurrentProfileMode < 2 )
+	{
+		btn->uiFlags&=~(BUTTON_CLICKED_ON);
+		return;
+	}
+
+
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
+	{
+		 btn->uiFlags|=(BUTTON_CLICKED_ON);
+	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
+      iCurrentImpPage = IMP_ATTRIBUTE_ENTRANCE;
+			fButtonPendingFlag = TRUE;
+		}
+	}
+}
+
+void BtnIMPMainPagePortraitCallback(GUI_BUTTON *btn,INT32 reason)
+{
+
+	// btn callback for Main Page Begin Profiling
+
+	if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
+  // if not this far in char generation, don't alot ANY action
+	if( ( iCurrentProfileMode != 3 )&&( iCurrentProfileMode != 4) && ( iCurrentProfileMode > 5 ) )
+	{
+		btn->uiFlags&=~(BUTTON_CLICKED_ON);
+		return;
+	}
+
+
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
+	{
+		 btn->uiFlags|=(BUTTON_CLICKED_ON);
+	}
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
+	{
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
+      iCurrentImpPage = IMP_PORTRAIT;
+			fButtonPendingFlag = TRUE;
+		}
 	}
 }
 
 
-static void BtnIMPMainPageAttributesCallback(GUI_BUTTON *btn, INT32 reason)
+void BtnIMPMainPageVoiceCallback(GUI_BUTTON *btn,INT32 reason)
 {
+
 	// btn callback for Main Page Begin Profiling
 
+	if (!(btn->uiFlags & BUTTON_ENABLED))
+		return;
   // if not this far in char generation, don't alot ANY action
-	if (iCurrentProfileMode < 2)
+	if( ( iCurrentProfileMode != 4 ) && ( iCurrentProfileMode > 5 ) )
 	{
-		btn->uiFlags &= ~BUTTON_CLICKED_ON;
+		btn->uiFlags&=~(BUTTON_CLICKED_ON);
 		return;
 	}
 
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
+
+
+	if(reason & MSYS_CALLBACK_REASON_LBUTTON_DWN )
 	{
-		iCurrentImpPage = IMP_ATTRIBUTE_ENTRANCE;
-		fButtonPendingFlag = TRUE;
+		 btn->uiFlags|=(BUTTON_CLICKED_ON);
 	}
-}
-
-
-void BtnIMPMainPagePortraitCallback(GUI_BUTTON *btn, INT32 reason)
-{
-	// btn callback for Main Page Begin Profiling
-
-  // if not this far in char generation, don't alot ANY action
-	if (iCurrentProfileMode != 3 && iCurrentProfileMode != 4 && iCurrentProfileMode > 5)
+	else if(reason & MSYS_CALLBACK_REASON_LBUTTON_UP )
 	{
-		btn->uiFlags&= ~BUTTON_CLICKED_ON;
-		return;
-	}
-
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
-	{
-		iCurrentImpPage = IMP_PORTRAIT;
-		fButtonPendingFlag = TRUE;
-	}
-}
-
-
-void BtnIMPMainPageVoiceCallback(GUI_BUTTON *btn, INT32 reason)
-{
-	// btn callback for Main Page Begin Profiling
-
-  // if not this far in char generation, don't alot ANY action
-	if (iCurrentProfileMode != 4 && iCurrentProfileMode > 5)
-	{
-		btn->uiFlags&= ~BUTTON_CLICKED_ON;
-		return;
-	}
-
-	if (reason & MSYS_CALLBACK_REASON_LBUTTON_UP)
-	{
-		iCurrentImpPage = IMP_VOICE;
-		fButtonPendingFlag = TRUE;
+		if (btn->uiFlags & BUTTON_CLICKED_ON)
+		{
+      btn->uiFlags&=~(BUTTON_CLICKED_ON);
+      iCurrentImpPage = IMP_VOICE;
+			fButtonPendingFlag = TRUE;
+		}
 	}
 }
 
