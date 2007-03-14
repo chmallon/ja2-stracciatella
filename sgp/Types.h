@@ -6,8 +6,7 @@
 #define UNIMPLEMENTED() \
 	fprintf(stderr, "===> %s:%d: %s() is not implemented\n", __FILE__, __LINE__, __func__); \
 	abort();
-#define FIXME \
-	fprintf(stderr, "===> %s:%d: %s() FIXME\n", __FILE__, __LINE__, __func__);
+#define FIXME (void)0;
 
 
 #define lengthof(a) (sizeof(a) / sizeof(a[0]))
