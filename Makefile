@@ -365,7 +365,6 @@ SRCS += sgp/Compression.c
 SRCS += sgp/Container.c
 SRCS += sgp/Cursor_Control.c
 SRCS += sgp/Debug.c
-SRCS += sgp/English.c
 SRCS += sgp/FileMan.c
 SRCS += sgp/Font.c
 SRCS += sgp/HImage.c
