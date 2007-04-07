@@ -19,7 +19,7 @@
 //#define SOUND_DISABLE
 
 
-#if 1
+#if 0
 #	define SNDDBG(fmt, ...) fprintf(stderr, ">>>> SND: " fmt, __VA_ARGS__);
 #else
 #	define SNDDBG(fmt, ...)
