@@ -7,10 +7,26 @@
 #include <wchar.h>
 
 
-#ifdef __linux__
+#if defined(__linux__) || defined(_WIN32)
 
 size_t wcslcpy(wchar_t* dst, const wchar_t* src, size_t size);
 size_t strlcpy(char* dst, const char* src, size_t size);
+
+#endif
+
+
+#ifdef _WIN32
+
+#include <stdarg.h>
+
+
+void WINsnprintf(char* s, size_t n, const char* format, ...);
+void WINswprintf(wchar_t* s, size_t n, const wchar_t* format, ...);
+void WINvswprintf(wchar_t* s, size_t n, const wchar_t* format, va_list arg);
+
+#define snprintf  WINsnprintf
+#define swprintf  WINswprintf
+#define vswprintf WINvswprintf
 
 #endif
 
