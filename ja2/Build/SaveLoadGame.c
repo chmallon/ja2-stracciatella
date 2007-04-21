@@ -3082,7 +3082,7 @@ static BOOLEAN SaveEmailToSavedGame(HWFILE hFile)
 		SavedEmail.usLength = pEmail->usLength;
 		SavedEmail.ubSender = pEmail->ubSender;
 		SavedEmail.iDate = pEmail->iDate;
-		SavedEmail.iId = pEmail->iId;
+		SavedEmail.iId = 0; // XXX HACK000B
 		SavedEmail.iFirstData = pEmail->iFirstData;
 		SavedEmail.uiSecondData = pEmail->uiSecondData;
 		SavedEmail.fRead = pEmail->fRead;
@@ -3135,7 +3135,6 @@ static BOOLEAN LoadEmailFromSavedGame(HWFILE hFile)
 		pTempEmail->usLength = SavedEmail.usLength;
 		pTempEmail->ubSender = SavedEmail.ubSender;
 		pTempEmail->iDate = SavedEmail.iDate;
-		pTempEmail->iId = SavedEmail.iId;
 		pTempEmail->fRead = SavedEmail.fRead;
 		pTempEmail->iFirstData = SavedEmail.iFirstData;
 		pTempEmail->uiSecondData = SavedEmail.uiSecondData;
@@ -3154,7 +3153,7 @@ static BOOLEAN LoadEmailFromSavedGame(HWFILE hFile)
 		//moved to the next email
 		Prev = pTempEmail;
 
-		AddMessageToPages( pTempEmail->iId );
+		AddMessageToPages(pTempEmail);
 	}
 
 	return( TRUE );
