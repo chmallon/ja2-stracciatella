@@ -77,7 +77,6 @@ GetQuoteBitNumberFromQuoteID(): callers
 GetRootName(): complicated
 GetSectorFacilitiesFlags(): complicated
 GetSectorIDString(): complicated
-GetShopKeeperInterfaceUserInput(): empty switch ()
 GetSlotInvHeightWidth(), GetSlotInvXY(): interface complicated, callers
 GetSoldierAboveGuyPositions(): (twoards end of function) no decision
 GetTheStateOfDepartedMerc(): callers
@@ -192,7 +191,6 @@ RenderFemaleGenderIcon(): complicated
 RenderInactiveTextFieldNode(): Use ShadowVideoSurfaceRect() instead of Blt16BPPBufferShadowRect() and remove dependency on VObject_Blitters
 RenderInventoryForCharacter(): callers
 RenderItemDescriptionBox(): code duplication
-RenderSkiAtmPanel(): empty
 RenderSummaryWindow(): LockVideoSurface() called unnecessarily often
 RenderSummaryWindow(): Use ShadowVideoSurfaceRect() instead of Blt16BPPBufferShadowRect() and remove dependency on VObject_Blitters
 SAIMOVECODE: use enum
