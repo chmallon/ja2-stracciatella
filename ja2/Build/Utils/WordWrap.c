@@ -313,7 +313,7 @@ WRAPPED_STRING *LineWrap(UINT32 ulFont, UINT16 usLineWidthPixels, UINT16 *pusLin
 
 					 //allocate memory for the string
 					 pWrappedString->pNextWrappedString = MemAlloc(sizeof(WRAPPED_STRING));
-						pWrappedString->pNextWrappedString->sString = MemAlloc(sizeof(*pWrappedString->pNextWrappedString->sString) * (wcslen(DestString) + 1));
+						pWrappedString->pNextWrappedString->sString = MemAlloc(sizeof(*pWrappedString->pNextWrappedString->sString) * (wcslen(pNullString) + 1));
 					 wcscpy(pWrappedString->pNextWrappedString->sString, pNullString);
 					 pWrappedString->pNextWrappedString->pNextWrappedString = NULL;
 					}
