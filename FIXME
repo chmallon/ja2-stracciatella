@@ -35,6 +35,7 @@ CreateSGPPaletteFromCOLFile(): FileExists() + FileOpen() == complicated
 DONT_DISPLAY_TEXT: what is this good for?
 DeathTimerCallback(): complicated
 DecayCreatures(), EVENT_DECAY_CREATURES: empty/unused
+DisplayEmploymentinformation(): code duplication
 DisplayEmploymentinformation(): pointless loop
 DisplayMercStats(): callers
 DisplayMovingTitleBar(): callers
