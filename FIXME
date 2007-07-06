@@ -253,7 +253,6 @@ SetInputFieldStringWithNumericStrictValue(): complicated
 SetSelection(): callers
 SetSteadyStateAmbience(): fInNight used as lower index bound incorrectly, because upper bound is not adjusted
 SetTilesetOneTerrainValues(): set callback to avoid explicit test
-SkiGlowColorsA: unused
 SoldierCanSeeCatchComing(): empty
 SoldierCarriesTwoHandedWeapon(): complicated
 StandardGunListAmmoReplacement(): declaration in .c
