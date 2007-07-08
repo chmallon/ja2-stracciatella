@@ -860,7 +860,6 @@ BOOLEAN MakeFileManDirectory(const char *pcDirectory)
 BOOLEAN RemoveFileManDirectory(const char *pcDirectory, BOOLEAN fRecursive)
 {
 #if 1 // XXX TODO
-	fprintf(stderr, "===> %s:%d: IGNORING %s(\"%s\", %s)\n", __FILE__, __LINE__, __func__, pcDirectory, fRecursive ? "TRUE" : "FALSE");
 	return FALSE;
 	UNIMPLEMENTED();
 #else
@@ -1220,7 +1219,6 @@ UINT32 FileGetAttributes(const char *strFilename)
 BOOLEAN FileClearAttributes(const char *strFilename)
 {
 #if 1 // XXX TODO
-	fprintf(stderr, "===> %s:%d: IGNORING %s(\"%s\")\n", __FILE__, __LINE__, __func__, strFilename);
 	return FALSE;
 	UNIMPLEMENTED();
 #else
