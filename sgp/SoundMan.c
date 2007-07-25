@@ -135,7 +135,6 @@ static BOOLEAN SoundSampleIsPlaying(UINT32 uiSample);
 static BOOLEAN SoundIndexIsPlaying(UINT32 uiSound);
 static BOOLEAN SoundStopIndex(UINT32 uiSound);
 static UINT32 SoundGetVolumeIndex(UINT32 uiChannel);
-static BOOLEAN SoundSetVolumeIndex(UINT32 uiChannel, UINT32 uiVolume);
 
 // Global variables
 static const UINT32 guiSoundDefaultVolume = 127;
@@ -496,35 +495,13 @@ BOOLEAN SoundSetVolume(UINT32 uiSoundID, UINT32 uiVolume)
 {
 	if (!fSoundSystemInit) return FALSE;
 
-	UINT32 uiVolCap = __min(uiVolume, 127);
-
 	UINT32 uiSound = SoundGetIndexByID(uiSoundID);
 	if (uiSound == NO_SAMPLE) return FALSE;
 
-	pSoundList[uiSound].uiFadeVolume = uiVolume;
-	return SoundSetVolumeIndex(uiSound, uiVolume);
-}
-
-
-//*****************************************************************************************
-// SoundSetVolumeIndex
-//
-// Sounds the volume on a sound channel.
-//
-// Returns BOOLEAN            - TRUE if the volume was set
-//
-// UINT32 uiChannel           - Sound channel
-// UINT32 uiVolume            - New volume 0-127
-//
-// Created:  3/17/00 Derek Beland
-//*****************************************************************************************
-static BOOLEAN SoundSetVolumeIndex(UINT32 uiChannel, UINT32 uiVolume)
-{
-	if (!fSoundSystemInit) return FALSE;
-
-	pSoundList[uiChannel].uiFadeVolume = __min(uiVolume, 127);
+	pSoundList[uiSound].uiFadeVolume = __min(uiVolume, 127);
 	return TRUE;
 }
+
 
 //*******************************************************************************
 // SoundSetPan
