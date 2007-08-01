@@ -578,7 +578,7 @@ void MapScreenMessage(UINT16 usColor, UINT8 ubPriority, const wchar_t* pStringA,
 			return;
 
 		case MSG_SKULL_UI_FEEDBACK:
-			InternalBeginUIMessage(TRUE, DestString);
+			BeginSkullUIMessage(DestString);
 			return;
 
 		case MSG_ERROR:
