@@ -30,3 +30,4 @@ low prio
 - TODO0009 Possible endless loop
 - TODO000A Memory leak?
 - TODO0010 Is there a difference between MercPtrs[i] and &Menptr[i]?
+- TODO0012 Is this fix for the infinite loop when throwing right?
