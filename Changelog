@@ -1,3 +1,5 @@
+(r1522) Fix a crash caused by r1400 in battles with bloodcats.
+
 v0.6
 (r1393) Fix a vanilla bug: In the personnel screen the salary of non-AIM/MERC mercenaries was assumed to be 0, so it did not count twoards the min/max/daily salary stats.
 (r1387) Fix vanilla slight misplacement of name/location and assignment/state in the personnel screen.
