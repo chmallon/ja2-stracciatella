@@ -1349,7 +1349,7 @@ BOOLEAN CreateSMPanelButtons(void)
 	memset( iSMPanelButtons, -1, sizeof( iSMPanelButtons ) );
 
 	if (!MakeButton(SM_MAP_SCREEN_BUTTON, iSMPanelImages[MAPSCREEN_IMAGES],  SM_MAPSCREEN_X,   SM_MAPSCREEN_Y,   BUTTON_TOGGLE,    DEFAULT_MOVE_CALLBACK, BtnMapScreenCallback,  TacticalStr[MAPSCREEN_POPUPTEXT]))          return FALSE;
-	if (!MakeButton(SM_DONE_BUTTON,       iSMPanelImages[DONE_IMAGES],       SM_DONE_X,        SM_DONE_Y,        BUTTON_TOGGLE,    DEFAULT_MOVE_CALLBACK, BtnTalkCallback,       TacticalStr[END_TURN_POPUPTEXT]))           return FALSE;
+	if (!MakeButton(SM_DONE_BUTTON,       iSMPanelImages[DONE_IMAGES],       SM_DONE_X,        SM_DONE_Y,        BUTTON_TOGGLE,    DEFAULT_MOVE_CALLBACK, BtnSMDoneCallback,     TacticalStr[END_TURN_POPUPTEXT]))           return FALSE;
 	if (!MakeButton(TALK_BUTTON,          iSMPanelImages[TALK_IMAGES],       SM_TALKB_X,       SM_TALKB_Y,       BUTTON_NEWTOGGLE, MSYS_NO_CALLBACK,      BtnTalkCallback,       TacticalStr[TALK_CURSOR_POPUPTEXT]))        return FALSE;
 	if (!MakeButton(MUTE_BUTTON,          iSMPanelImages[MUTE_IMAGES],       SM_MUTEB_X,       SM_MUTEB_Y,       BUTTON_NEWTOGGLE, DEFAULT_MOVE_CALLBACK, BtnMuteCallback,       TacticalStr[TOGGLE_MUTE_POPUPTEXT]))        return FALSE;
 	if (!MakeButton(STANCEUP_BUTTON,      iSMPanelImages[STANCEUP_IMAGES],   SM_STANCEUPB_X,   SM_STANCEUPB_Y,   BUTTON_TOGGLE,    DEFAULT_MOVE_CALLBACK, BtnStanceUpCallback,   TacticalStr[CHANGE_STANCE_UP_POPUPTEXT]))   return FALSE;

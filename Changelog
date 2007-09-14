@@ -1,3 +1,5 @@
+(r1523) Fix a mixup in r1487: The end turn button in the single merc panel was linked to the mute button callback.
+
 v0.6
 (r1472) Fix graphically stuck buttons.
 (r1461, r1475) Fix wide string/string format specifiers.
