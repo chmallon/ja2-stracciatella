@@ -41,7 +41,6 @@ DisplayEmploymentinformation(): code duplication
 DisplayEmploymentinformation(): pointless loop
 DisplayOrderGrid(): call IsMercDead() more early
 DisplayPurchasedItems(): iSubTotal undefined value
-Display{Highest,Lowest}StatValuesForCurrentTeam(): code duplication
 DoWeHaveThisManyBonusPoints(): complicated
 DoesTownHaveRatingToTrainMilitia(): complicated
 DoesVehicleHaveAnyPassengers(): complicated
