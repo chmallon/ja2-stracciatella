@@ -955,7 +955,7 @@ static UINT32 UIHandleNewMerc(UI_EVENT* pUIEvent)
 				pSoldier = FindSoldierByProfileID( ubTemp, FALSE );
 
 				MercArrivesCallback( pSoldier->ubID );
-				SelectSoldier(pSoldier->ubID, SELSOLDIER_FORCE_RESELECT);
+				SelectSoldier(pSoldier, SELSOLDIER_FORCE_RESELECT);
 			}
 
 	 }
@@ -1152,7 +1152,7 @@ static UINT32 UIHandleSelectMerc(UI_EVENT* pUIEvent)
 	{
 		 iCurrentSquad = CurrentSquad( );
 
-		SelectSoldier(gUIFullTarget->ubID, SELSOLDIER_ACKNOWLEDGE | SELSOLDIER_FROM_UI);
+		SelectSoldier(gUIFullTarget, SELSOLDIER_ACKNOWLEDGE | SELSOLDIER_FROM_UI);
 
 		 // If different, display message
 		 if ( CurrentSquad( ) != iCurrentSquad )
@@ -1299,7 +1299,7 @@ static UINT32 UIHandleMOnTerrain(UI_EVENT* pUIEvent)
 
         if ( ubID != NOBODY )
         {
-        	SelectSoldier(ubID, 0);
+        	SelectSoldier(GetMan(ubID), 0);
         }
         else
         {
@@ -4533,7 +4533,7 @@ void EndMultiSoldierSelection( BOOLEAN fAcknowledge )
 	// If here, select the first guy...
 	if ( pFirstSoldier != NULL && !fSelectedSoldierInBatch )
 	{
-		SelectSoldier(pFirstSoldier->ubID, SELSOLDIER_ACKNOWLEDGE | SELSOLDIER_FORCE_RESELECT);
+		SelectSoldier(pFirstSoldier, SELSOLDIER_ACKNOWLEDGE | SELSOLDIER_FORCE_RESELECT);
 	}
 }
 
