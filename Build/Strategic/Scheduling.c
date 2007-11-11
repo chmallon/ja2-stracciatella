@@ -59,7 +59,7 @@ void CopyScheduleToList( SCHEDULENODE *pSchedule, SOLDIERINITNODE *pNode )
 	gubScheduleID++;
 	//Assign all of the links
 	gpScheduleList->ubScheduleID = gubScheduleID;
-	gpScheduleList->ubSoldierID = pNode->pSoldier->ubID;
+	gpScheduleList->soldier      = pNode->pSoldier;
 	pNode->pDetailedPlacement->ubScheduleID = gubScheduleID;
 	pNode->pSoldier->ubScheduleID = gubScheduleID;
 	if( gubScheduleID > 40 )
@@ -159,7 +159,6 @@ static void PrepareScheduleForAutoProcessing(SCHEDULENODE* pSchedule, UINT32 uiS
 void ProcessTacticalSchedule( UINT8 ubScheduleID )
 {
 	SCHEDULENODE *pSchedule;
-	SOLDIERTYPE *pSoldier;
 	INT32 iScheduleIndex=0;
 	BOOLEAN fAutoProcess;
 
@@ -173,16 +172,16 @@ void ProcessTacticalSchedule( UINT8 ubScheduleID )
 		return;
 	}
 	//Attempt to access the soldier involved
-	if( pSchedule->ubSoldierID >= TOTAL_SOLDIERS )
+	SOLDIERTYPE* const pSoldier = pSchedule->soldier;
+	if (pSoldier == NULL)
 	{
-		#ifdef JA2BETAVERSION
-			ScreenMsg( FONT_RED, MSG_BETAVERSION, L"Schedule callback:  Illegal soldier ID of %d.", pSchedule->ubSoldierID );
-		#endif
+#ifdef JA2BETAVERSION
+		ScreenMsg(FONT_RED, MSG_BETAVERSION, L"Schedule callback:  Illegal NULL soldier.");
+#endif
 		return;
 	}
 
 	//Validate the existance of the soldier.
-	pSoldier = MercPtrs[ pSchedule->ubSoldierID ];
 	if ( pSoldier->bLife < OKLIFE )
 	{
 		// dead or dying!
@@ -323,7 +322,7 @@ void PrepareSchedulesForEditorEntry()
 				prev->next = curr->next;
 			else
 				gpScheduleList = gpScheduleList->next;
-			MercPtrs[ curr->ubSoldierID ]->ubScheduleID = 0;
+			curr->soldier->ubScheduleID = 0;
 			temp = curr;
 			curr = curr->next;
 			MemFree( temp );
@@ -382,7 +381,7 @@ void LoadSchedules( INT8 **hBuffer )
 		Assert(s == endof(data));
 
 		node->ubScheduleID = gubScheduleID++;
-		node->ubSoldierID  = NO_SOLDIER;
+		node->soldier      = NULL;
 
 		if (pSchedule != NULL)
 		{
@@ -423,14 +422,14 @@ BOOLEAN LoadSchedulesFromSave( HWFILE hFile )
 		SCHEDULENODE* const node = MemAlloc(sizeof(*node));
 
 		const BYTE* s = data;
-		EXTR_PTR( s, node->next)
-		EXTR_U16A(s, node->usTime,   lengthof(node->usTime))
-		EXTR_U16A(s, node->usData1,  lengthof(node->usData1))
-		EXTR_U16A(s, node->usData2,  lengthof(node->usData2))
-		EXTR_U8A( s, node->ubAction, lengthof(node->ubAction))
-		EXTR_U8(  s, node->ubScheduleID)
-		EXTR_U8(  s, node->ubSoldierID)
-		EXTR_U16( s, node->usFlags)
+		EXTR_PTR(    s, node->next)
+		EXTR_U16A(   s, node->usTime,   lengthof(node->usTime))
+		EXTR_U16A(   s, node->usData1,  lengthof(node->usData1))
+		EXTR_U16A(   s, node->usData2,  lengthof(node->usData2))
+		EXTR_U8A(    s, node->ubAction, lengthof(node->ubAction))
+		EXTR_U8(     s, node->ubScheduleID)
+		EXTR_SOLDIER(s, node->soldier)
+		EXTR_U16(    s, node->usFlags)
 		Assert(s == endof(data));
 
 		if (pSchedule != NULL)
@@ -448,7 +447,7 @@ BOOLEAN LoadSchedulesFromSave( HWFILE hFile )
 		// should be unnecessary here, then we can toast reconnect schedule
 		/*
 		pSchedule->ubScheduleID = gubScheduleID;
-		pSchedule->ubSoldierID = NO_SOLDIER;
+		pSchedule->soldier      = NULL;
 		*/
 
 		gubScheduleID++;
@@ -545,14 +544,14 @@ BOOLEAN SaveSchedules( HWFILE hFile )
 
 			BYTE data[36];
 			BYTE* d = data;
-			INJ_PTR( d, curr->next)
-			INJ_U16A(d, curr->usTime,   lengthof(curr->usTime))
-			INJ_U16A(d, curr->usData1,  lengthof(curr->usData1))
-			INJ_U16A(d, curr->usData2,  lengthof(curr->usData2))
-			INJ_U8A( d, curr->ubAction, lengthof(curr->ubAction))
-			INJ_U8(  d, curr->ubScheduleID)
-			INJ_U8(  d, curr->ubSoldierID)
-			INJ_U16( d, curr->usFlags)
+			INJ_PTR(    d, curr->next)
+			INJ_U16A(   d, curr->usTime,   lengthof(curr->usTime))
+			INJ_U16A(   d, curr->usData1,  lengthof(curr->usData1))
+			INJ_U16A(   d, curr->usData2,  lengthof(curr->usData2))
+			INJ_U8A(    d, curr->ubAction, lengthof(curr->ubAction))
+			INJ_U8(     d, curr->ubScheduleID)
+			INJ_SOLDIER(d, curr->soldier)
+			INJ_U16(    d, curr->usFlags)
 			Assert(d == endof(data));
 
 			if (!FileWrite(hFile, data, sizeof(data))) return FALSE;
@@ -657,7 +656,6 @@ static void AutoProcessSchedule(SCHEDULENODE* pSchedule, INT32 index)
 {
 	INT16						sCellX, sCellY, sGridNo;
 	INT8						bDirection;
-	SOLDIERTYPE *		pSoldier;
 
 	if ( gTacticalStatus.uiFlags & LOADING_SAVED_GAME )
 	{
@@ -667,7 +665,7 @@ static void AutoProcessSchedule(SCHEDULENODE* pSchedule, INT32 index)
 		return;
 	}
 
-	pSoldier = MercPtrs[ pSchedule->ubSoldierID ];
+	SOLDIERTYPE* const pSoldier = pSchedule->soldier;
 
 	#ifdef JA2EDITOR
 		if ( pSoldier->ubProfile != NO_PROFILE )
@@ -865,7 +863,7 @@ static void PostSchedule(SOLDIERTYPE* pSoldier)
 		}
 	}
 
-	pSchedule->ubSoldierID = pSoldier->ubID;
+	pSchedule->soldier = pSoldier;
 
 	// always process previous 24 hours
 	uiEndTime = GetWorldTotalMin();
@@ -981,7 +979,7 @@ static void PostDefaultSchedule(SOLDIERTYPE* pSoldier)
 	gubScheduleID++;
 	//Assign all of the links
 	gpScheduleList->ubScheduleID = gubScheduleID;
-	gpScheduleList->ubSoldierID = pSoldier->ubID;
+	gpScheduleList->soldier      = pSoldier;
 	pSoldier->ubScheduleID = gubScheduleID;
 
 	//Clear the data inside the schedule
@@ -1298,7 +1296,7 @@ void ReconnectSchedules( void )
 			if ( pSchedule )
 			{
 				// set soldier ptr to point to this guy!
-				pSchedule->ubSoldierID = pSoldier->ubID;
+				pSchedule->soldier = pSoldier;
 			}
 			else
 			{
