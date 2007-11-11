@@ -444,12 +444,6 @@ BOOLEAN LoadSchedulesFromSave( HWFILE hFile )
 		}
 		pSchedule = node;
 
-		// should be unnecessary here, then we can toast reconnect schedule
-		/*
-		pSchedule->ubScheduleID = gubScheduleID;
-		pSchedule->soldier      = NULL;
-		*/
-
 		gubScheduleID++;
 		ubRealNum--;
 	}
@@ -1278,35 +1272,6 @@ static INT8 GetEmptyScheduleEntry(SCHEDULENODE* pSchedule)
 
 	return( -1 );
 }
-
-
-/*
-void ReconnectSchedules( void )
-{
-	UINT32						uiLoop;
-	SOLDIERTYPE *			pSoldier;
-	SCHEDULENODE *		pSchedule;
-
-	for ( uiLoop = gTacticalStatus.Team[ CIV_TEAM ].bFirstID; uiLoop <= gTacticalStatus.Team[ CIV_TEAM ].bLastID; uiLoop++ )
-	{
-		pSoldier = MercPtrs[ uiLoop ];
-		if ( pSoldier->bActive && pSoldier->bInSector && pSoldier->ubScheduleID != 0 )
-		{
-			pSchedule = GetSchedule( pSoldier->ubScheduleID );
-			if ( pSchedule )
-			{
-				// set soldier ptr to point to this guy!
-				pSchedule->soldier = pSoldier;
-			}
-			else
-			{
-				// need default schedule!
-				//PostDefaultSchedule( pSoldier );
-			}
-		}
-	}
-}
-*/
 
 
 static UINT16 FindSleepSpot(SCHEDULENODE* pSchedule)
