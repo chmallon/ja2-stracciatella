@@ -2392,7 +2392,6 @@ void SayQuoteFromNearbyMercInSector( INT16 sGridNo, INT8 bDistance, UINT16 usQuo
 		}
 	}
 
-	// If we are > 0
 	if ( ubNumMercs > 0 )
 	{
 		SOLDIERTYPE* const chosen = mercs_in_sector[Random(ubNumMercs)];
@@ -2407,9 +2406,7 @@ void SayQuoteFromNearbyMercInSector( INT16 sGridNo, INT8 bDistance, UINT16 usQuo
 
 void SayQuote58FromNearbyMercInSector( INT16 sGridNo, INT8 bDistance, UINT16 usQuoteNum, INT8 bSex )
 {
-	UINT8	ubMercsInSector[ 20 ] = { 0 };
 	UINT8	ubNumMercs = 0;
-	UINT8	ubChosenMerc;
 	SOLDIERTYPE *pTeamSoldier;
 	INT32 cnt;
 
@@ -2419,6 +2416,7 @@ void SayQuote58FromNearbyMercInSector( INT16 sGridNo, INT8 bDistance, UINT16 usQ
 	cnt = gTacticalStatus.Team[ gbPlayerNum ].bFirstID;
 
 	// run through list
+	SOLDIERTYPE* mercs_in_sector[20];
 	for ( pTeamSoldier = MercPtrs[ cnt ]; cnt <= gTacticalStatus.Team[ gbPlayerNum ].bLastID; cnt++,pTeamSoldier++ )
 	{
 		// Add guy if he's a candidate...
@@ -2436,18 +2434,15 @@ void SayQuote58FromNearbyMercInSector( INT16 sGridNo, INT8 bDistance, UINT16 usQ
 				continue;
 			}
 
-			ubMercsInSector[ ubNumMercs ] = (UINT8)cnt;
-			ubNumMercs++;
+			mercs_in_sector[ubNumMercs++] = pTeamSoldier;
 		}
 	}
 
-	// If we are > 0
 	if ( ubNumMercs > 0 )
 	{
-		ubChosenMerc = (UINT8)Random( ubNumMercs );
-		TacticalCharacterDialogue( MercPtrs[ ubMercsInSector[ ubChosenMerc ] ], usQuoteNum );
+		SOLDIERTYPE* const chosen = mercs_in_sector[Random(ubNumMercs)];
+		TacticalCharacterDialogue(chosen, usQuoteNum);
 	}
-
 }
 
 
