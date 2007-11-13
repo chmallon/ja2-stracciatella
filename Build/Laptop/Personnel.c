@@ -1220,9 +1220,6 @@ static void DisplayFaceOfDisplayedMerc(void)
 			const PastMercInfo info = GetSelectedPastMercInfo();
 			RenderPersonnelFacePast(info.id, info.state);
 			DisplayDepartedCharName(info.id, info.state);
-
-			if (gubPersonnelInfoState == PRSNL_INV) return;
-
 			DisplayDepartedCharStats(info.id, info.state);
 		}
 	}
