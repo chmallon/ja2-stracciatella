@@ -287,7 +287,7 @@ void GameInitPersonnel(void)
 static void CreateDestroyCurrentDepartedMouseRegions(BOOLEAN create);
 static void CreateDestroyMouseRegionsForPersonnelPortraits(BOOLEAN create);
 static void CreatePersonnelButtons(void);
-static INT32 GetIdOfFirstDisplayedMerc(void);
+static void SelectFirstDisplayedMerc(void);
 static INT32 GetNumberOfMercsDeadOrAliveOnPlayersTeam(void);
 static BOOLEAN LoadPersonnelGraphics(void);
 static BOOLEAN LoadPersonnelScreenBackgroundGraphics(void);
@@ -297,8 +297,6 @@ static void SetPersonnelButtonStates(void);
 void EnterPersonnel(void)
 {
 	fReDrawScreenFlag=TRUE;
-
-	iCurrentPersonSelectedId = -1;
 
 	uiCurrentInventoryIndex = 0;
 	guiSliderPosition = 0;
@@ -314,15 +312,10 @@ void EnterPersonnel(void)
 	// load personnel
 	LoadPersonnelScreenBackgroundGraphics();
 
+	SelectFirstDisplayedMerc();
 
 	// render screen
 	RenderPersonnel();
-
-	// how many people do we have?..if you have someone set default to 0
-	if (GetNumberOfMercsDeadOrAliveOnPlayersTeam() > 0)
-	{
-		iCurrentPersonSelectedId = GetIdOfFirstDisplayedMerc();
-	}
 
 	CreateDestroyMouseRegionsForPersonnelPortraits(TRUE);
 	CreateDestroyCurrentDepartedMouseRegions(TRUE);
@@ -1887,14 +1880,7 @@ static void PersonnelCurrentTeamCallback(MOUSE_REGION* pRegion, INT32 iReason)
 
 		if (fCurrentTeamMode)
 		{
-			iCurrentPersonSelectedId = -1;
-
-			// how many people do we have?..if you have someone set default to 0
-			if (GetNumberOfMercsDeadOrAliveOnPlayersTeam() > 0)
-			{
-				// get id of first merc in list
-				iCurrentPersonSelectedId = GetIdOfFirstDisplayedMerc();
-			}
+			SelectFirstDisplayedMerc();
 		}
 
 		fCurrentTeamMode = TRUE;
@@ -1911,13 +1897,7 @@ static void PersonnelDepartedTeamCallback(MOUSE_REGION* pRegion, INT32 iReason)
 
 		if (!fCurrentTeamMode)
 		{
-			iCurrentPersonSelectedId = -1;
-
-			// how many departed people?
-			if (GetNumberOfPastMercsOnPlayersTeam() > 0)
-			{
-				iCurrentPersonSelectedId = 0;
-			}
+			SelectFirstDisplayedMerc();
 
 			//Switch the panel on the right to be the stat panel
 			gubPersonnelInfoState = PERSONNEL_STAT_BTN;
@@ -2454,8 +2434,8 @@ BOOLEAN RemoveNewlyHiredMercFromPersonnelDepartedList(UINT8 ubProfile)
 }
 
 
-// grab the id of the first merc being displayed
-static INT32 GetIdOfFirstDisplayedMerc(void)
+// Select the first displayed merc, if there is any
+static void SelectFirstDisplayedMerc(void)
 {
 	// set current soldier
 	if (fCurrentTeamMode)
@@ -2468,15 +2448,15 @@ static INT32 GetIdOfFirstDisplayedMerc(void)
 		{
 			if (pSoldier->bActive && !(pSoldier->uiStatusFlags & SOLDIER_VEHICLE))
 			{
-				return 0;
+				iCurrentPersonSelectedId = 0;
+				return;
 			}
 		}
-		return -1;
+		iCurrentPersonSelectedId = -1;
 	}
 	else
 	{
-		// run through list of soldier on players old team...the slot id will be translated
-		return 0;
+		iCurrentPersonSelectedId = GetNumberOfPastMercsOnPlayersTeam() > 0 ? 0 : -1;
 	}
 }
 
