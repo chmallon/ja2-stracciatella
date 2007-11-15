@@ -303,7 +303,7 @@ SOLDIERTYPE* TacticalCreateSoldier(const SOLDIERCREATE_STRUCT* const pCreateStru
 		// LOAD MERC's FACE!
 		if (pCreateStruct->ubProfile != NO_PROFILE && s->bTeam == OUR_TEAM)
 		{
-			s->iFaceIndex = InitSoldierFace(s);
+			InitSoldierFace(s);
 		}
 
 		s->bActionPoints        = CalcActionPoints(s);
@@ -573,7 +573,7 @@ SOLDIERTYPE* TacticalCreateSoldier(const SOLDIERCREATE_STRUCT* const pCreateStru
 
 		//Reset the face index
 		s->iFaceIndex = -1;
-		s->iFaceIndex = InitSoldierFace(s);
+		InitSoldierFace(s);
 
     // ATE: Reset soldier's light value to -1....
     s->iLight = -1;
@@ -1896,7 +1896,7 @@ void ForceSoldierProfileID( SOLDIERTYPE *pSoldier, UINT8 ubProfileID )
 	DeleteSoldierFace( pSoldier );
 
 	// Init face
-	pSoldier->iFaceIndex = InitSoldierFace( pSoldier );
+	InitSoldierFace(pSoldier);
 
 	// Update animation, palettes
 	SetSoldierAnimationSurface( pSoldier, pSoldier->usAnimState );
