@@ -346,7 +346,6 @@ fPlayerPlan: strange
 fCopyProfileItemsOver: strange
 MiscPal
 pExistingSoldier: load/save?
-fUseExistingSoldier: strange
 fKillSlotIfOwnerDies
 fUseGivenVehicle: strange
 fHasKeys: strange
