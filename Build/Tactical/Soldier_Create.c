@@ -585,7 +585,7 @@ SOLDIERTYPE* TacticalCreateSoldier(const SOLDIERCREATE_STRUCT* const pCreateStru
 	}
 
 	// Alrighty then, we are set to create the merc, stuff after here can fail!
-	CHECKF(CreateSoldierCommon(s, s->usAnimState));
+	CHECKF(CreateSoldierCommon(s));
 
 	if (pCreateStruct->fOnRoof && FlatRoofAboveGridNo(pCreateStruct->sInsertionGridNo))
 	{
