@@ -1092,7 +1092,6 @@ static void InitSoldierStruct(SOLDIERTYPE* pSoldier)
 	pSoldier->uiAIDelay							= 100;
 
 	pSoldier->iLight								= -1;
-	pSoldier->iFaceIndex						= -1;
 
 	// Set update time to new speed
 	pSoldier->ubDesiredHeight				= NO_DESIRED_HEIGHT;
