@@ -405,9 +405,6 @@ fGoingToEnterDemo_UNUSED
 fNOTDOLASTDEMO_UNUSED
 fMultiplayer
 
-VIDEO_OVERLAY
-uiUserData[]: write-only in unused function
-
 
 BUGS
 KillPreBattleInterface(): EnableDisAbleMapScreenOptionsButton(TRUE) maybe tries to enable non-existent buttons
