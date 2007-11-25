@@ -19,8 +19,6 @@ ChangeStatusOfOpenableStructInUnloadedSector(): file leak on error
 CheckForAndHandleSoldierDeath(): interface complicated, return *pfMadeCorpse?
 CheckForMultiTilesInTreeAndAddToUndoList(): unused (self recursion)
 ChooseCreatureQuestStartDay(): empty
-CleanUpStack(): declaration in .c
-CompileInteractiveTiles(): empty
 ConfirmActionCancel(): overkill
 ContractBoxGlow(): empty
 ContractListRegionBoxGlow: giContractHighLine == -1 test unnecessary
@@ -38,7 +36,6 @@ DisplayEmploymentinformation(): code duplication
 DisplayEmploymentinformation(): pointless loop
 DisplayOrderGrid(): call IsMercDead() more early
 DisplayPurchasedItems(): iSubTotal undefined value
-DoWeHaveThisManyBonusPoints(): complicated
 DoesTownHaveRatingToTrainMilitia(): complicated
 DoesVehicleHaveAnyPassengers(): complicated
 DoneFadeInActionLeaveBasement(): empty
@@ -88,8 +85,6 @@ HandleMinuteUpdate(): empty
 HandleMinuteUpdate(): remove?
 HandleMoraleEventForSoldier(): callers
 HandleOpinionOfTownsAboutSoldier(): empty
-HandlePlayerTeamMemberDeathAfterSkullAnimation(): declaration in .c
-HandleSoldierFaceFlash(): empty
 HandleSummaryInput(): fallthrough SDLK_ESCAPE -> SDLK_RETURN?
 HeliCharacterDialogue(): callers
 IMPVideoObjects.h(): many needlessly called functions?
@@ -172,7 +167,6 @@ RemoveGraphicFromTempFile(): file leak on error
 RemoveGraphicFromTempFile(): memory leak
 RemoveItemGUI(): callers
 RenderFaceOverlay(): users
-RenderFemaleGenderIcon(): complicated
 RenderItemDescriptionBox(): code duplication
 RenderShopKeeperInterface(): MARK_DIRTY necessary?
 RenderSummaryWindow(): LockVideoSurface() called unnecessarily often
@@ -181,7 +175,7 @@ RenderTiles(): SetFontDestBuffer() + mprintf_buffer() strange
 SAIMOVECODE: use enum
 SAVED_GAME_HEADER: gets saved/loaded, but contains wchar_t
 SHOW_AP_LEFT: never set
-SLOW_ANIMATION: never set or cleared, only in unused function
+SLOW_ANIMATION: never set or cleared
 SOLDIERCREATE_STRUCT: gets saved/loaded, but contains wchar_t
 SOLDIER_GREEN_RAY: never set
 SOLDIER_QUOTE_SAID_DROWNING: never set
@@ -196,7 +190,6 @@ SaveDoorTableToDoorTableTempFile(): FileExists() + FileDelete() + FileOpen() == 
 SaveEnemySoldiersToTempFile(), NewWayOfSavingEnemyAndCivliansToTempFile(): code duplication
 SaveGame(): double close in error case (called function closes and then file gets closed again in error handler)
 SaveLightEffectsToMapTempFile(): FileDelete() + FileOpen() == complicated
-SaveLightEffectsToSaveGameFile(): empty
 SaveLightEffectsToSaveGameFile(): empty
 SaveMapTileset(): sizeof(TileSurfaceFilenames[cnt]) != 65
 SaveSmokeEffectsToMapTempFile(): FileDelete() + FileOpen() == complicated
