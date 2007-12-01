@@ -1448,7 +1448,6 @@ static UINT32 UIHandlePositionMenu(UI_EVENT* pUIEvent)
 static UINT32 UIHandleAOnTerrain(UI_EVENT* pUIEvent)
 {
 	UINT16						usMapPos;
-//	INT16							sTargetXPos, sTargetYPos;
 
 	if( !GetMouseMapPos( &usMapPos) )
 	{
@@ -1515,12 +1514,7 @@ static UINT32 UIHandleAOnTerrain(UI_EVENT* pUIEvent)
 					 if ( !gUITargetReady )
 					 {
 							// Move to proper stance + direction!
-							// Convert our grid-not into an XY
-						//	ConvertGridNoToXY( usMapPos, &sTargetXPos, &sTargetYPos );
-
-							// Ready weapon
-					//		SoldierReadyWeapon( pSoldier, sTargetXPos, sTargetYPos, FALSE );
-
+							//SoldierReadyWeapon(pSoldier, usMapPos, FALSE);
 							gUITargetReady = TRUE;
 					 }
 
@@ -2403,7 +2397,6 @@ static UINT32 UIHandleCAMercShoot(UI_EVENT* pUIEvent)
 
 static UINT32 UIHandleAEndAction(UI_EVENT* pUIEvent)
 {
-	INT16 sTargetXPos, sTargetYPos;
 	UINT16						usMapPos;
 
 	// Get gridno at this location
@@ -2420,12 +2413,7 @@ static UINT32 UIHandleAEndAction(UI_EVENT* pUIEvent)
 			if ( gUITargetReady )
 			{
 				// Move to proper stance + direction!
-				// Convert our grid-not into an XY
-				ConvertGridNoToXY( usMapPos, &sTargetXPos, &sTargetYPos );
-
-				// UNReady weapon
-				SoldierReadyWeapon( pSoldier, sTargetXPos, sTargetYPos, TRUE );
-
+				SoldierReadyWeapon(pSoldier, usMapPos, TRUE); // UNReady weapon
 				gUITargetReady = FALSE;
 			}
 
