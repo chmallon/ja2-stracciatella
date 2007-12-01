@@ -3126,7 +3126,6 @@ static UINT32 UIHandleIETEndTurn(UI_EVENT* pUIEvent)
 void GetCursorMovementFlags( UINT32 *puiCursorFlags )
 {
 	UINT16	usMapPos;
-	INT16		sXPos, sYPos;
 
 	static  BOOLEAN fStationary = FALSE;
 	static	UINT16	usOldMouseXPos  = 32000;
@@ -3144,7 +3143,6 @@ void GetCursorMovementFlags( UINT32 *puiCursorFlags )
 	}
 
 	GetMouseMapPos( &usMapPos );
-	ConvertGridNoToXY( usMapPos, &sXPos, &sYPos );
 
 	*puiCursorFlags = 0;
 
