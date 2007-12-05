@@ -3342,7 +3342,6 @@ static INT8 DrawUIMovementPath(SOLDIERTYPE* pSoldier, UINT16 usMapPos, UINT32 ui
 	INT16							sAPCost, sBPCost;
 	INT16							sActionGridNo;
 	STRUCTURE					*pStructure;
-	UINT8							ubDirection;
 	INT16							sAdjustedGridNo;
   INT16							sIntTileGridNo;
 	LEVELNODE					*pIntTile;
@@ -3372,7 +3371,7 @@ static INT8 DrawUIMovementPath(SOLDIERTYPE* pSoldier, UINT16 usMapPos, UINT32 ui
 			// We should not have null here if we are given this flag...
 			if ( pIntTile != NULL )
 			{
-				sActionGridNo =  FindAdjacentGridEx( pSoldier, sIntTileGridNo, &ubDirection, NULL, FALSE, TRUE );
+				sActionGridNo = FindAdjacentGridEx(pSoldier, sIntTileGridNo, NULL, NULL, FALSE, TRUE);
 				if ( sActionGridNo == -1 )
 				{
 					sActionGridNo = sIntTileGridNo;
@@ -3397,7 +3396,7 @@ static INT8 DrawUIMovementPath(SOLDIERTYPE* pSoldier, UINT16 usMapPos, UINT32 ui
 	}
 	else if ( uiFlags == MOVEUI_TARGET_WIREFENCE )
 	{
-		sActionGridNo =  FindAdjacentGridEx( pSoldier, usMapPos, &ubDirection, NULL, FALSE, TRUE );
+		sActionGridNo = FindAdjacentGridEx(pSoldier, usMapPos, NULL, NULL, FALSE, TRUE);
 		if ( sActionGridNo == -1 )
 		{
 			sAPCost = 0;
@@ -3417,7 +3416,7 @@ static INT8 DrawUIMovementPath(SOLDIERTYPE* pSoldier, UINT16 usMapPos, UINT32 ui
 	}
 	else if ( uiFlags == MOVEUI_TARGET_JAR )
 	{
-		sActionGridNo =  FindAdjacentGridEx( pSoldier, usMapPos, &ubDirection, NULL, FALSE, TRUE );
+		sActionGridNo = FindAdjacentGridEx(pSoldier, usMapPos, NULL, NULL, FALSE, TRUE);
 		if ( sActionGridNo == -1 )
 		{
 			sActionGridNo = usMapPos;
@@ -3441,7 +3440,7 @@ static INT8 DrawUIMovementPath(SOLDIERTYPE* pSoldier, UINT16 usMapPos, UINT32 ui
 		// We should not have null here if we are given this flag...
 		if ( pIntTile != NULL )
 		{
-			sActionGridNo =  FindAdjacentGridEx( pSoldier, sIntTileGridNo, &ubDirection, NULL, FALSE, TRUE );
+			sActionGridNo = FindAdjacentGridEx(pSoldier, sIntTileGridNo, NULL, NULL, FALSE, TRUE);
 			if ( sActionGridNo != -1 )
 			{
 				sAPCost = AP_ATTACH_CAN;
@@ -3477,7 +3476,7 @@ static INT8 DrawUIMovementPath(SOLDIERTYPE* pSoldier, UINT16 usMapPos, UINT32 ui
 			}
 		}
 
-		sActionGridNo =  FindAdjacentGridEx( pSoldier, usMapPos, &ubDirection, NULL, FALSE, TRUE );
+		sActionGridNo =  FindAdjacentGridEx(pSoldier, usMapPos, NULL, NULL, FALSE, TRUE);
 		if ( sActionGridNo == -1 )
 		{
 			sActionGridNo = usMapPos;
@@ -3507,7 +3506,7 @@ static INT8 DrawUIMovementPath(SOLDIERTYPE* pSoldier, UINT16 usMapPos, UINT32 ui
 			}
 		}
 
-		sActionGridNo =  FindAdjacentGridEx( pSoldier, usMapPos, &ubDirection, NULL, FALSE, TRUE );
+		sActionGridNo = FindAdjacentGridEx(pSoldier, usMapPos, NULL, NULL, FALSE, TRUE);
 		if ( sActionGridNo == -1 )
 		{
 			sActionGridNo = usMapPos;
@@ -3552,14 +3551,13 @@ static INT8 DrawUIMovementPath(SOLDIERTYPE* pSoldier, UINT16 usMapPos, UINT32 ui
 							// Who is the one we want......
 							sGotLocation = sSpot;
 							sAdjustedGridNo	= tgt->sGridNo;
-							ubDirection		= ( UINT8 )cnt;
 							break;
 						}
 				 }
 
 				 if ( sGotLocation == NOWHERE )
 				 {
-					sActionGridNo = FindAdjacentGridEx(pSoldier, tgt->sGridNo, &ubDirection, &sAdjustedGridNo, TRUE, FALSE);
+					sActionGridNo = FindAdjacentGridEx(pSoldier, tgt->sGridNo, NULL, &sAdjustedGridNo, TRUE, FALSE);
 
 						if ( sActionGridNo == -1 )
 						{
@@ -3597,7 +3595,7 @@ static INT8 DrawUIMovementPath(SOLDIERTYPE* pSoldier, UINT16 usMapPos, UINT32 ui
 		const SOLDIERTYPE* const tgt = gUIFullTarget;
 		if (tgt != NULL)
 			{
-				sActionGridNo = FindAdjacentGridEx(pSoldier, tgt->sGridNo, &ubDirection, &sAdjustedGridNo, TRUE, FALSE);
+				sActionGridNo = FindAdjacentGridEx(pSoldier, tgt->sGridNo, NULL, &sAdjustedGridNo, TRUE, FALSE);
 				if ( sActionGridNo == -1 )
 				{
 					sActionGridNo = sAdjustedGridNo;
@@ -3630,12 +3628,12 @@ static INT8 DrawUIMovementPath(SOLDIERTYPE* pSoldier, UINT16 usMapPos, UINT32 ui
 		const SOLDIERTYPE* const tgt = gUIFullTarget;
 		if (tgt != NULL)
 			{
-				sActionGridNo = FindAdjacentGridEx(pSoldier, tgt->sGridNo, &ubDirection, &sAdjustedGridNo, TRUE, FALSE);
+				sActionGridNo = FindAdjacentGridEx(pSoldier, tgt->sGridNo, NULL, &sAdjustedGridNo, TRUE, FALSE);
 
 				// Try again at another gridno...
 				if ( sActionGridNo == -1 )
 				{
-					sActionGridNo =  FindAdjacentGridEx( pSoldier, usMapPos, &ubDirection, &sAdjustedGridNo, TRUE, FALSE );
+					sActionGridNo = FindAdjacentGridEx(pSoldier, usMapPos, NULL, &sAdjustedGridNo, TRUE, FALSE);
 
 					if ( sActionGridNo == -1 )
 					{
@@ -4948,7 +4946,6 @@ BOOLEAN HandleTalkInit(  )
 	UINT8							ubDiceRoll;
 	INT16							sDistVisible;
 	INT16							sActionGridNo;
-	UINT8							ubDirection;
 
 	SOLDIERTYPE* pSoldier = GetSoldier(gusSelectedSoldier);
 	if (pSoldier == NULL) return FALSE;
@@ -5081,7 +5078,7 @@ BOOLEAN HandleTalkInit(  )
 				if ( uiRange > NPC_TALK_RADIUS )
 				{
 					// First get an adjacent gridno....
-					sActionGridNo =  FindAdjacentGridEx( pSoldier, pTSoldier->sGridNo, &ubDirection, NULL, FALSE, TRUE );
+					sActionGridNo = FindAdjacentGridEx(pSoldier, pTSoldier->sGridNo, NULL, NULL, FALSE, TRUE);
 
 					if ( sActionGridNo == -1 )
 					{
