@@ -2794,12 +2794,6 @@ BOOLEAN UIHandleOnMerc( BOOLEAN fMovementMode )
 	{
 		if ( uiMercFlags & OWNED_MERC )
 		{
-			// ATE: Check if this is an empty vehicle.....
-			//if ( OK_ENTERABLE_VEHICLE( pSoldier ) && GetNumberInVehicle( pSoldier->bVehicleID ) == 0 )
-			//{
-			//	return( FALSE );
-			//}
-
 			// If not unconscious, select
 			if ( !( uiMercFlags & UNCONSCIOUS_MERC ) )
 			{
@@ -5158,7 +5152,9 @@ static INT8 UIHandleInteractiveTilesAndItemsOnTerrain(SOLDIERTYPE* pSoldier, INT
 					}
 					else
 					{
-						if (GetNumberInVehicle(tgt->bVehicleID) == 0)
+						const VEHICLETYPE* const v = GetVehicle(tgt->bVehicleID);
+						Assert(v != NULL);
+						if (GetNumberInVehicle(v) == 0)
 						{
 							// Set UI CURSOR....
 							guiNewUICursor = ENTER_VEHICLE_UICURSOR;
