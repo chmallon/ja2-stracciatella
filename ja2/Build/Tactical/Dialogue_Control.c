@@ -200,7 +200,6 @@ void HandleTacticalTextUI( INT32 iFaceIndex, SOLDIERTYPE *pSoldier, wchar_t *zQu
 void HandleTacticalNPCTextUI( UINT8 ubCharacterNum, wchar_t *zQuoteStr );
 void HandleTacticalSpeechUI( UINT8 ubCharacterNum, INT32 iFaceIndex );
 void DisplayTextForExternalNPC(  UINT8 ubCharacterNum, STR16 zQuoteStr );
-void CreateTalkingUI( INT8 bUIHandlerID, INT32 iFaceIndex, UINT8 ubCharacterNum, SOLDIERTYPE *pSoldier, wchar_t *zQuoteStr, size_t Length);
 
 
 void HandleExternNPCSpeechFace( INT32 iIndex );
@@ -401,6 +400,9 @@ void StopAnyCurrentlyTalkingSpeech( )
 }
 
 
+static void CreateTalkingUI(INT8 bUIHandlerID, INT32 iFaceIndex, UINT8 ubCharacterNum, SOLDIERTYPE* pSoldier, wchar_t* zQuoteStr);
+
+
 // ATE: Handle changes like when face goes from
 // 'external' to on the team panel...
 void HandleDialogueUIAdjustments( )
@@ -441,7 +443,7 @@ void HandleDialogueUIAdjustments( )
 
 
 						// Setup UI again!
-						CreateTalkingUI( gbUIHandlerID, pSoldier->iFaceIndex, pSoldier->ubProfile, pSoldier, gzQuoteStr, lengthof(gzQuoteStr));
+						CreateTalkingUI(gbUIHandlerID, pSoldier->iFaceIndex, pSoldier->ubProfile, pSoldier, gzQuoteStr);
 					}
 				}
 			}
@@ -1647,7 +1649,7 @@ BOOLEAN ExecuteCharacterDialogue( UINT8 ubCharacterNum, UINT16 usQuoteNum, INT32
 		SetFaceTalking( iFaceIndex, zSoundString, gzQuoteStr, RATE_11025, 30, 1, MIDDLEPAN );
 	}
 	// pSoldier can be null here... ( if NOT from an alive soldier )
-	CreateTalkingUI( bUIHandlerID, iFaceIndex, ubCharacterNum, pSoldier, gzQuoteStr, lengthof(gzQuoteStr));
+	CreateTalkingUI(bUIHandlerID, iFaceIndex, ubCharacterNum, pSoldier, gzQuoteStr);
 
 	// Set global handleer ID value, used when face desides it's done...
 	gbUIHandlerID = bUIHandlerID;
@@ -1658,7 +1660,7 @@ BOOLEAN ExecuteCharacterDialogue( UINT8 ubCharacterNum, UINT16 usQuoteNum, INT32
 }
 
 
-void CreateTalkingUI( INT8 bUIHandlerID, INT32 iFaceIndex, UINT8 ubCharacterNum, SOLDIERTYPE *pSoldier, wchar_t *zQuoteStr, size_t Length)
+static void CreateTalkingUI(INT8 bUIHandlerID, INT32 iFaceIndex, UINT8 ubCharacterNum, SOLDIERTYPE* pSoldier, wchar_t* zQuoteStr)
 {
 
 	// Show text, if on
@@ -1677,7 +1679,7 @@ void CreateTalkingUI( INT8 bUIHandlerID, INT32 iFaceIndex, UINT8 ubCharacterNum,
 				break;
 
 			case DIALOGUE_CONTACTPAGE_UI:
-				DisplayTextForMercFaceVideoPopUp( zQuoteStr, Length);
+				DisplayTextForMercFaceVideoPopUp(zQuoteStr);
 				break;
 
 			case DIALOGUE_SPECK_CONTACT_PAGE_UI:

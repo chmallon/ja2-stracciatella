@@ -2446,13 +2446,14 @@ BOOLEAN DisplayTalkingMercFaceForVideoPopUp(INT32	iFaceIndex)
 	return(fIsTheMercTalking);
 }
 
-void DisplayTextForMercFaceVideoPopUp(STR16 pString, size_t Length)
+
+void DisplayTextForMercFaceVideoPopUp(const wchar_t* const pString)
 {
 
 #ifdef TAIWANESE
-	swprintf( gsTalkingMercText, Length, L"%s", pString );
+	swprintf(gsTalkingMercText, lengthof(gsTalkingMercText), L"%ls", pString);
 #else
-	swprintf( gsTalkingMercText, Length, L"\"%s\"", pString );
+	swprintf(gsTalkingMercText, lengthof(gsTalkingMercText), L"\"%ls\"", pString);
 #endif
 
 	//Set the minimum time for the dialogue text to be present
