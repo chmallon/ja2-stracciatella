@@ -918,6 +918,49 @@ static UINT32 SoundGetCached(const char* pFilename)
 }
 
 
+static BOOLEAN HalfSampleRate(SAMPLETAG* const s)
+{
+	SNDDBG("SMPL \"%s\" from %uHz to %uHz\n", s->pName, s->uiSpeed, s->uiSpeed / 2);
+
+	size_t const size  = s->uiSoundSize / 2;
+	void*  const ndata = malloc(size);
+	if (ndata == NULL) return FALSE;
+	void*  const odata = s->pData;
+	switch (s->ubBits)
+	{
+		case 8:
+		{
+			UINT8*       const dst = ndata;
+			const UINT8* const src = odata;
+			for (size_t i = 0; i < size; ++i)
+			{
+				dst[i] = (src[2 * i] + src[2 * i + 1]) / 2;
+			}
+			break;
+		}
+
+		case 16:
+		{
+			INT16*       const dst = ndata;
+			const INT16* const src = odata;
+			for (size_t i = 0; i < size / 2; ++i)
+			{
+				dst[i] = (src[2 * i] + src[2 * i + 1]) / 2;
+			}
+			break;
+		}
+
+		default: abort();
+	}
+	s->pData = ndata;
+	free(odata);
+
+	s->uiSoundSize /= 2;
+	s->uiSpeed     /= 2;
+	return TRUE;
+}
+
+
 #define FOURCC(a, b, c, d) ((UINT8)(d) << 24 | (UINT8)(c) << 16 | (UINT8)(b) << 8 | (UINT8)(a))
 
 
@@ -1152,8 +1195,13 @@ static UINT32 SoundLoadDisk(const char* pFilename)
 
 sound_loaded:
 	FileClose(hFile);
-	guiSoundMemoryUsed += Sample->uiSoundSize;
 	strcpy(Sample->pName, pFilename);
+	if (Sample->uiSpeed == 44100 && !HalfSampleRate(Sample))
+	{
+		free(Sample->pData);
+		return NO_SAMPLE;
+	}
+	guiSoundMemoryUsed += Sample->uiSoundSize;
 	Sample->uiFlags = SAMPLE_ALLOCATED;
 	Sample->uiInstances = 0;
 	return uiSample;
