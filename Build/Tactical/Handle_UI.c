@@ -1668,7 +1668,7 @@ static UINT32 UIHandleCMoveMerc(UI_EVENT* pUIEvent)
 			gfGetNewPathThroughPeople = FALSE;
 
 			// RESET MOVE FAST FLAG
-			SetConfirmMovementModeCursor( pSoldier, TRUE );
+			SetConfirmMovementModeCursor(sel, TRUE);
 
 			gfUIAllMoveOn = 0;
 
