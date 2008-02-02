@@ -902,7 +902,6 @@ static UINT32 UIHandleNewMerc(UI_EVENT* pUIEvent)
 	 static UINT8				ubTemp = 3;
 	 MERC_HIRE_STRUCT HireMercStruct;
 	 INT8		bReturnCode;
-	 SOLDIERTYPE *pSoldier;
 
 	const GridNo usMapPos = GetMouseMapPos();
 	if (usMapPos != NOWHERE)
@@ -939,7 +938,7 @@ static UINT32 UIHandleNewMerc(UI_EVENT* pUIEvent)
 			else
 			{
 				// Get soldier from profile
-				pSoldier = FindSoldierByProfileID( ubTemp, FALSE );
+				SOLDIERTYPE* const pSoldier = FindSoldierByProfileID(ubTemp);
 				MercArrivesCallback(pSoldier);
 				SelectSoldier(pSoldier, SELSOLDIER_FORCE_RESELECT);
 			}
