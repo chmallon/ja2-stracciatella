@@ -405,7 +405,6 @@ static void DisplayPastMercsPortraits(void);
 static void DisplayPersonnelSummary(void);
 static void DisplayPersonnelTextOnTitleBar(void);
 static void DisplayPicturesOfCurrentTeam(void);
-static void DisplayStateOfPastTeamMembers(void);
 static void DisplayTeamStats(void);
 static void RenderAtmPanel(void);
 static void RenderPersonnelScreenBackground(void);
@@ -435,9 +434,6 @@ void RenderPersonnel(void)
 
 	DisplayPersonnelSummary();
 	DisplayTeamStats();
-
-	// past team
-	DisplayStateOfPastTeamMembers();
 
 	// title bar
 	BlitTitleBarIcons();
@@ -1428,6 +1424,7 @@ static void CreateDestroyPersonnelInventoryScrollButtons(void)
 
 
 static void DisplayCostOfCurrentTeam(void);
+static void DisplayStateOfPastTeamMembers(void);
 
 
 static void DisplayPersonnelSummary(void)
@@ -1457,6 +1454,7 @@ static void DisplayPersonnelSummary(void)
 		mprintf(sX, PERS_CURR_TEAM_Y, s);
 
 		mprintf(PERS_CURR_TEAM_X, PERS_DEPART_TEAM_Y, L"%ls ( %d )", pPersonelTeamStrings[1], GetNumberOfPastMercsOnPlayersTeam());
+		DisplayStateOfPastTeamMembers();
 	}
 }
 
@@ -1717,36 +1715,29 @@ static INT32 GetNumberOfOtherOnPastTeam(void)
 }
 
 
+// diplays numbers fired, dead and other
 static void DisplayStateOfPastTeamMembers(void)
 {
 	INT16 sX, sY;
 	CHAR16 sString[32];
 
-	SetFont(FONT10ARIAL);
-	SetFontBackground(FONT_BLACK);
-	SetFontForeground(PERS_TEXT_FONT_COLOR);
+	// dead
+	mprintf(PERS_CURR_TEAM_COST_X, PERS_CURR_TEAM_COST_Y, pPersonelTeamStrings[5]);
+	swprintf(sString, lengthof(sString), L"%d", GetNumberOfDeadOnPastTeam());
+	FindFontRightCoordinates(PERS_CURR_TEAM_COST_X, 0, PERS_DEPART_TEAM_WIDTH, 0, sString, PERS_FONT, &sX, &sY);
+	mprintf(sX, PERS_CURR_TEAM_COST_Y, sString);
 
-	// diplsya numbers fired, dead and othered
-	if (!fCurrentTeamMode)
-	{
-		// dead
-		mprintf(PERS_CURR_TEAM_COST_X, PERS_CURR_TEAM_COST_Y, pPersonelTeamStrings[5]);
-		swprintf(sString, lengthof(sString), L"%d", GetNumberOfDeadOnPastTeam());
-		FindFontRightCoordinates(PERS_CURR_TEAM_COST_X, 0, PERS_DEPART_TEAM_WIDTH, 0, sString, PERS_FONT, &sX, &sY);
-		mprintf(sX, PERS_CURR_TEAM_COST_Y, sString);
+	// fired
+	mprintf(PERS_CURR_TEAM_COST_X, PERS_CURR_TEAM_HIGHEST_Y, pPersonelTeamStrings[6]);
+	swprintf(sString, lengthof(sString), L"%d", GetNumberOfLeftOnPastTeam());
+	FindFontRightCoordinates(PERS_CURR_TEAM_COST_X, 0, PERS_DEPART_TEAM_WIDTH, 0, sString, PERS_FONT, &sX, &sY);
+	mprintf(sX, PERS_CURR_TEAM_HIGHEST_Y, sString);
 
-		// fired
-		mprintf(PERS_CURR_TEAM_COST_X, PERS_CURR_TEAM_HIGHEST_Y, pPersonelTeamStrings[6]);
-		swprintf(sString, lengthof(sString), L"%d", GetNumberOfLeftOnPastTeam());
-		FindFontRightCoordinates(PERS_CURR_TEAM_COST_X, 0, PERS_DEPART_TEAM_WIDTH, 0, sString, PERS_FONT, &sX, &sY);
-		mprintf(sX, PERS_CURR_TEAM_HIGHEST_Y, sString);
-
-		// other
-		mprintf(PERS_CURR_TEAM_COST_X, PERS_CURR_TEAM_LOWEST_Y, pPersonelTeamStrings[7]);
-		swprintf(sString, lengthof(sString), L"%d", GetNumberOfOtherOnPastTeam());
-		FindFontRightCoordinates(PERS_CURR_TEAM_COST_X, 0, PERS_DEPART_TEAM_WIDTH, 0, sString, PERS_FONT, &sX, &sY);
-		mprintf(sX, PERS_CURR_TEAM_LOWEST_Y, sString);
-	}
+	// other
+	mprintf(PERS_CURR_TEAM_COST_X, PERS_CURR_TEAM_LOWEST_Y, pPersonelTeamStrings[7]);
+	swprintf(sString, lengthof(sString), L"%d", GetNumberOfOtherOnPastTeam());
+	FindFontRightCoordinates(PERS_CURR_TEAM_COST_X, 0, PERS_DEPART_TEAM_WIDTH, 0, sString, PERS_FONT, &sX, &sY);
+	mprintf(sX, PERS_CURR_TEAM_LOWEST_Y, sString);
 }
 
 
