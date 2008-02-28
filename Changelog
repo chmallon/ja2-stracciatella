@@ -1,3 +1,4 @@
+(r3104) Fix a crash caused by r1766 when using alternate give mode (right-click) to hand an item to another merc in tactical mode.
 (r1650) Fix vanilla rounding errors: The scrollbar in the inventory view of the personnel screen was not positioned correctly and could be moved one beyond the last item.
 
 v0.7 - 2007-10-21 - Cinnamon
