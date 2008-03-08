@@ -9792,7 +9792,7 @@ void SetAssignmentForList( INT8 bAssignment, INT8 bParam )
 				case( VEHICLE ):
 					if (CanCharacterVehicle(pSoldier))
 					{
-						const VEHICLETYPE* const v = GetVehicle(pSoldier->bVehicleID);
+						VEHICLETYPE* const v = GetVehicle(bParam);
 						if (v != NULL && IsThisVehicleAccessibleToSoldier(pSoldier, v))
 						{
 							// if the vehicle is FULL, then this will return FALSE!
