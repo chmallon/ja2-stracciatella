@@ -404,16 +404,16 @@ UINT16 GetCorpseStructIndex(const ROTTING_CORPSE_DEFINITION* pCorpseDef, BOOLEAN
 }
 
 
-static BOOLEAN CreateCorpsePalette(ROTTING_CORPSE* pCorpse);
+static void CreateCorpsePalette(ROTTING_CORPSE*);
 
 
 ROTTING_CORPSE* AddRottingCorpse(ROTTING_CORPSE_DEFINITION* const pCorpseDef)
 {
-	if (pCorpseDef->sGridNo == NOWHERE)   goto fail;
-	if (pCorpseDef->ubType  == NO_CORPSE) goto fail;
+	if (pCorpseDef->sGridNo == NOWHERE)   return NULL;
+	if (pCorpseDef->ubType  == NO_CORPSE) return NULL;
 
 	ROTTING_CORPSE* const c = GetFreeRottingCorpse();
-	if (c == NULL) goto fail;
+	if (c == NULL) return NULL;
 
 	// Copy elements in
 	c->def = *pCorpseDef;
@@ -443,7 +443,7 @@ ROTTING_CORPSE* AddRottingCorpse(ROTTING_CORPSE_DEFINITION* const pCorpseDef)
 		}
 
     // If time of death is a few days, now, don't add at all!
-		if (GetWorldTotalMin() - c->def.uiTimeOfDeath > DELAY_UNTIL_DONE_ROTTING) goto fail;
+		if (GetWorldTotalMin() - c->def.uiTimeOfDeath > DELAY_UNTIL_DONE_ROTTING) return NULL;
 	}
 
 	// Check if on roof or not...
@@ -471,7 +471,7 @@ ROTTING_CORPSE* AddRottingCorpse(ROTTING_CORPSE_DEFINITION* const pCorpseDef)
 	}
 
 	ANITILE* const ani = CreateAnimationTile(&AniParams);
-  if (ani == NULL) goto fail;
+	if (ani == NULL) return NULL;
 	c->pAniTile = ani;
 
   LEVELNODE*       const n    = ani->pLevelNode;
@@ -485,7 +485,7 @@ ROTTING_CORPSE* AddRottingCorpse(ROTTING_CORPSE_DEFINITION* const pCorpseDef)
 	n->ubNaturalShadeLevel  = land->ubNaturalShadeLevel;
 
 	// Get palette and create palettes and do substitutions
-	if (!CreateCorpsePalette(c)) goto fail_ani;
+	CreateCorpsePalette(c);
 
 	c->fActivated = TRUE;
 	ani->v.user.uiData = CORPSE2ID(c);
@@ -524,11 +524,6 @@ ROTTING_CORPSE* AddRottingCorpse(ROTTING_CORPSE_DEFINITION* const pCorpseDef)
 	}
 
 	return c;
-
-fail_ani:
-	DeleteAniTile(ani);
-fail:
-	return NULL;
 }
 
 
@@ -568,22 +563,22 @@ static void RemoveCorpse(ROTTING_CORPSE* const c)
 }
 
 
-static BOOLEAN CreateCorpsePalette(ROTTING_CORPSE* pCorpse)
+static void CreateCorpsePalette(ROTTING_CORPSE* const c)
 {
-	CHAR8	zColFilename[ 100 ];
-	INT8	bBodyTypePalette;
-
-	bBodyTypePalette = GetBodyTypePaletteSubstitutionCode( NULL, pCorpse->def.ubBodyType, zColFilename );
-
-	// If this corpse has camo,
-  if ( pCorpse->def.ubType == ROTTING_STAGE2 )
-  {
-		bBodyTypePalette = 0;
-  }
-	else if (pCorpse->def.usFlags & ROTTING_CORPSE_USE_CAMO_PALETTE)
+	char zColFilename[100];
+	INT8 bBodyTypePalette;
+	if (c->def.ubType == ROTTING_STAGE2)
 	{
-		strcpy( zColFilename, "ANIMS/camo.COL" );
+		bBodyTypePalette = 0;
+	}
+	else if (c->def.usFlags & ROTTING_CORPSE_USE_CAMO_PALETTE)
+	{
+		strcpy(zColFilename, "ANIMS/camo.COL");
 		bBodyTypePalette = 1;
+	}
+	else
+	{
+		bBodyTypePalette = GetBodyTypePaletteSubstitutionCode(NULL, c->def.ubBodyType, zColFilename);
 	}
 
 	const SGPPaletteEntry* pal;
@@ -591,11 +586,11 @@ static BOOLEAN CreateCorpsePalette(ROTTING_CORPSE* pCorpse)
 	if (bBodyTypePalette == -1)
 	{
 		// Use palette from HVOBJECT, then use substitution for pants, etc
-		memcpy(tmp_pal, gpTileCache[pCorpse->pAniTile->sCachedTileID].pImagery->vo->pPaletteEntry, sizeof(tmp_pal));
-		SetPaletteReplacement(tmp_pal, pCorpse->def.HeadPal);
-		SetPaletteReplacement(tmp_pal, pCorpse->def.VestPal);
-		SetPaletteReplacement(tmp_pal, pCorpse->def.PantsPal);
-		SetPaletteReplacement(tmp_pal, pCorpse->def.SkinPal);
+		memcpy(tmp_pal, gpTileCache[c->pAniTile->sCachedTileID].pImagery->vo->pPaletteEntry, sizeof(tmp_pal));
+		SetPaletteReplacement(tmp_pal, c->def.HeadPal);
+		SetPaletteReplacement(tmp_pal, c->def.VestPal);
+		SetPaletteReplacement(tmp_pal, c->def.PantsPal);
+		SetPaletteReplacement(tmp_pal, c->def.SkinPal);
 		pal = tmp_pal;
 	}
 	else if (bBodyTypePalette != 0 && CreateSGPPaletteFromCOLFile(tmp_pal, zColFilename))
@@ -605,13 +600,10 @@ static BOOLEAN CreateCorpsePalette(ROTTING_CORPSE* pCorpse)
 	else
 	{
 		// Use palette from hvobject
-		pal = gpTileCache[pCorpse->pAniTile->sCachedTileID].pImagery->vo->pPaletteEntry;
+		pal = gpTileCache[c->pAniTile->sCachedTileID].pImagery->vo->pPaletteEntry;
 	}
 
-	// create the basic shade table
-	CreateBiasedShadedPalettes(pCorpse->pShades, pal);
-
-	return( TRUE );
+	CreateBiasedShadedPalettes(c->pShades, pal);
 }
 
 
