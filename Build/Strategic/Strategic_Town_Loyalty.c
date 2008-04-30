@@ -1862,7 +1862,7 @@ static UINT32 PlayerStrength(void)
 
 static UINT32 EnemyStrength(void)
 {
-	UINT32 strength;
+	UINT32 strength = 0;
 	CFOR_ALL_NON_PLAYER_SOLDIERS(s)
 	{
 		if (!s->bInSector || s->bNeutral) continue;
