@@ -281,8 +281,6 @@ static BOOLEAN DoTrapCheckOnStartingMenu(SOLDIERTYPE* pSoldier, DOOR* pDoor)
 void InteractWithOpenableStruct( SOLDIERTYPE *pSoldier, STRUCTURE *pStructure, UINT8 ubDirection, BOOLEAN fDoor )
 {
 	STRUCTURE *			pBaseStructure;
-	BOOLEAN					fDoMenu = FALSE;
-	DOOR		*				pDoor;
 	DOOR_STATUS *		pDoorStatus;
   BOOLEAN         fTrapsFound = FALSE;
 
@@ -319,7 +317,7 @@ void InteractWithOpenableStruct( SOLDIERTYPE *pSoldier, STRUCTURE *pStructure, U
 			// Bring up menu to decide what to do....
 			SoldierGotoStationaryStance( pSoldier );
 
-			pDoor = FindDoorInfoAtGridNo( pBaseStructure->sGridNo );
+			DOOR* const pDoor = FindDoorInfoAtGridNo(pBaseStructure->sGridNo);
 			if ( pDoor )
 			{
 				if ( DoTrapCheckOnStartingMenu( pSoldier, pDoor ) )
@@ -342,53 +340,35 @@ void InteractWithOpenableStruct( SOLDIERTYPE *pSoldier, STRUCTURE *pStructure, U
 	}
 	else
 	{
-		// Bring up the menu, only if it has a lock!
 		if (IsOnOurTeam(pSoldier))
 		{
-			pDoor = FindDoorInfoAtGridNo( pBaseStructure->sGridNo );
-
-			if ( pDoor != NULL )
+			DOOR* const pDoor = FindDoorInfoAtGridNo(pBaseStructure->sGridNo);
+			if (pDoor != NULL && pDoor->fLocked) // Bring up the menu, only if it has a lock!
 			{
-        // Assume true
-				fDoMenu = TRUE;
+				// Bring up menu to decide what to do....
+				SoldierGotoStationaryStance(pSoldier);
 
-        // Check if it's locked.....
-        // If not locked, don't bring it up!
-        if ( !pDoor->fLocked )
-        {
-          fDoMenu = FALSE;
-        }
+				if (DoTrapCheckOnStartingMenu(pSoldier, pDoor))
+				{
+					fTrapsFound = TRUE;
+				}
+
+				// Pull Up Menu
+				if (!fTrapsFound)
+				{
+					InitDoorOpenMenu(pSoldier, FALSE);
+				}
+				else
+				{
+					UnSetUIBusy(pSoldier);
+				}
+				return;
 			}
 		}
 
-		if ( fDoMenu )
-		{
-			// Bring up menu to decide what to do....
-			SoldierGotoStationaryStance( pSoldier );
-
-			if ( DoTrapCheckOnStartingMenu( pSoldier, pDoor ) )
-      {
-        fTrapsFound = TRUE;
-      }
-
-			// Pull Up Menu
-      if ( !fTrapsFound )
-      {
-				InitDoorOpenMenu(pSoldier, FALSE);
-      }
-      else
-      {
-				UnSetUIBusy(pSoldier);
-      }
-		}
-		else
-		{
-			pSoldier->ubDoorHandleCode = HANDLE_DOOR_OPEN;
-
-			ChangeSoldierState( pSoldier, GetAnimStateForInteraction( pSoldier, fDoor, OPEN_DOOR ), 0, FALSE );
-		}
+		pSoldier->ubDoorHandleCode = HANDLE_DOOR_OPEN;
+		ChangeSoldierState(pSoldier, GetAnimStateForInteraction(pSoldier, fDoor, OPEN_DOOR), 0, FALSE);
 	}
-
 }
 
 
