@@ -84,7 +84,7 @@
 #define		TEXT_DELAY_MODIFIER			60
 
 
-typedef struct
+struct DIALOGUE_Q_STRUCT
 {
 	UINT16    usQuoteNum;
 	UINT8     ubCharacterNum;
@@ -99,7 +99,9 @@ typedef struct
 	BOOLEAN   fFromSoldier;
 	BOOLEAN   fDelayed;
 	BOOLEAN   fPauseTime;
-} DIALOGUE_Q_STRUCT, *DIALOGUE_Q_STRUCT_PTR;
+};
+
+typedef SGP::Queue<DIALOGUE_Q_STRUCT*> DialogueQueue;
 
 
 BOOLEAN fExternFacesLoaded = FALSE;
@@ -131,7 +133,7 @@ UINT8							gubNumStopTimeQuotes = 2;
 
 // QUEUE UP DIALOG!
 #define		INITIAL_Q_SIZE				10
-HQUEUE		ghDialogueQ						= NULL;
+static DialogueQueue* ghDialogueQ;
 FACETYPE	*gpCurrentTalkingFace	= NULL;
 UINT8			gubCurrentTalkingID   = NO_PROFILE;
 INT8			gbUIHandlerID;
@@ -200,44 +202,27 @@ BOOLEAN DialogueActive( )
 	return( FALSE );
 }
 
-BOOLEAN InitalizeDialogueControl()
+
+void InitalizeDialogueControl()
 {
-	ghDialogueQ = CreateQueue( INITIAL_Q_SIZE, sizeof( DIALOGUE_Q_STRUCT_PTR ) );
-
-	// Initalize subtitle popup box
-	//
-
+	ghDialogueQ         = new DialogueQueue(INITIAL_Q_SIZE);
 	giNPCReferenceCount = 0;
-
-
-	if ( ghDialogueQ == NULL )
-	{
-		return( FALSE );
-	}
-	else
-	{
-		return( TRUE );
-	}
 }
 
 void ShutdownDialogueControl()
 {
-  if( ghDialogueQ != NULL )
+	if (ghDialogueQ != NULL)
 	{
-		// Empty
-		EmptyDialogueQueue( );
-
-		// Delete
-		DeleteQueue( ghDialogueQ );
-		ghDialogueQ=NULL;
+		delete ghDialogueQ;
+		ghDialogueQ = NULL;
+		gfWaitingForTriggerTimer = FALSE;
 	}
 
 	// shutdown external static NPC faces
-	ShutdownStaticExternalNPCFaces( );
+	ShutdownStaticExternalNPCFaces();
 
 	// gte rid of portraits for cars
-	UnLoadCarPortraits( );
-	//
+	UnLoadCarPortraits();
 }
 
 
@@ -273,39 +258,22 @@ void ShutdownStaticExternalNPCFaces( void )
 }
 
 
-void EmptyDialogueQueue( )
+void EmptyDialogueQueue()
 {
 	// If we have anything left in the queue, remove!
-  if( ghDialogueQ != NULL )
+	if (ghDialogueQ != NULL)
 	{
-		// Delete list
-		DeleteQueue( ghDialogueQ );
-		ghDialogueQ=NULL;
-
-		// Recreate list
-		ghDialogueQ = CreateQueue( INITIAL_Q_SIZE, sizeof( DIALOGUE_Q_STRUCT_PTR ) );
-
+		delete ghDialogueQ;
+		ghDialogueQ = new DialogueQueue(INITIAL_Q_SIZE);
 	}
 
-  gfWaitingForTriggerTimer = FALSE;
+	gfWaitingForTriggerTimer = FALSE;
 }
 
 
 BOOLEAN DialogueQueueIsEmpty( )
 {
-	INT32										numDialogueItems;
-
-  if( ghDialogueQ != NULL )
-	{
-		numDialogueItems = QueueSize( ghDialogueQ );
-
-		if ( numDialogueItems == 0 )
-		{
-			return( TRUE );
-		}
-	}
-
-	return( FALSE );
+	return ghDialogueQ && ghDialogueQ->IsEmpty();
 }
 
 
@@ -401,9 +369,9 @@ void HandleDialogue()
 	// we don't want to just delay action of some events, we want to pause the whole queue, regardless of the event
 	if (gfDialogueQueuePaused) return;
 
-	INT32 const queue_size = QueueSize(ghDialogueQ);
+	bool const empty = ghDialogueQ->IsEmpty();
 
-	if (queue_size == 0 && gpCurrentTalkingFace == NULL)
+	if (empty && gpCurrentTalkingFace == NULL)
 	{
 		HandlePendingInitConv();
 	}
@@ -560,7 +528,7 @@ void HandleDialogue()
 		}
 	}
 
-	if (queue_size == 0)
+	if (empty)
 	{
 		if (gfMikeShouldSayHi == TRUE)
 		{
@@ -586,8 +554,7 @@ void HandleDialogue()
 	}
 
 	// If here, pick current one from queue and play
-	DIALOGUE_Q_STRUCT* d;
-	RemfromQueue(ghDialogueQ, &d);
+	DIALOGUE_Q_STRUCT* const d = ghDialogueQ->Remove();
 
 	// If we are in auto bandage, ignore any quotes!
 	if (gTacticalStatus.fAutoBandageMode)
@@ -610,7 +577,7 @@ void HandleDialogue()
 			gTacticalStatus.ubCurrentTeam != gbPlayerNum) // Are we not in our turn and not interrupted
 	{
 		//Place back in!
-		ghDialogueQ = AddtoQueue(ghDialogueQ, &d);
+		ghDialogueQ->Add(d);
 		return;
 	}
 
@@ -621,7 +588,7 @@ void HandleDialogue()
 			GetJA2Clock() - d->iTimeStamp < d->uiSpecialEventData2)
 	{
 		//Place back in!
-		ghDialogueQ = AddtoQueue(ghDialogueQ, &d);
+		ghDialogueQ->Add(d);
 		return;
 	}
 
@@ -630,7 +597,7 @@ void HandleDialogue()
 	if (s != NULL && SoundIsPlaying(s->uiBattleSoundID))
 	{
 		//Place back in!
-		ghDialogueQ = AddtoQueue(ghDialogueQ, &d);
+		ghDialogueQ->Add(d);
 		return;
 	}
 
@@ -1211,8 +1178,7 @@ BOOLEAN CharacterDialogueWithSpecialEvent(const UINT8 ubCharacterNum, const UINT
 	QItem->uiSpecialEventData		= uiData1;
 	QItem->uiSpecialEventData2	= uiData2;
 
-	// Add to queue
-	ghDialogueQ = AddtoQueue( ghDialogueQ, &QItem );
+	ghDialogueQ->Add(QItem);
 
 	if ( uiFlag & DIALOGUE_SPECIAL_EVENT_PCTRIGGERNPC )
 	{
@@ -1244,8 +1210,7 @@ static BOOLEAN CharacterDialogueWithSpecialEventEx(const UINT8 ubCharacterNum, c
 	QItem->uiSpecialEventData2	= uiData2;
 	QItem->uiSpecialEventData3	= uiData3;
 
-	// Add to queue
-	ghDialogueQ = AddtoQueue( ghDialogueQ, &QItem );
+	ghDialogueQ->Add(QItem);
 
 	if ( uiFlag & DIALOGUE_SPECIAL_EVENT_PCTRIGGERNPC )
 	{
@@ -1275,9 +1240,7 @@ BOOLEAN CharacterDialogue(const UINT8 ubCharacterNum, const UINT16 usQuoteNum, F
 
 	fPausedTimeDuringQuote = FALSE;
 
-	// Add to queue
-	ghDialogueQ = AddtoQueue( ghDialogueQ, &QItem );
-
+	ghDialogueQ->Add(QItem);
 	return( TRUE );
 }
 
@@ -1300,10 +1263,7 @@ BOOLEAN SpecialCharacterDialogueEvent(const UINT32 uiSpecialEventFlag, const UIN
 
 	fPausedTimeDuringQuote = FALSE;
 
-	// Add to queue
-	ghDialogueQ = AddtoQueue( ghDialogueQ, &QItem );
-
-
+	ghDialogueQ->Add(QItem);
 	return( TRUE );
 }
 
@@ -1327,10 +1287,7 @@ BOOLEAN SpecialCharacterDialogueEventWithExtraParam(const UINT32 uiSpecialEventF
 
 	fPausedTimeDuringQuote = FALSE;
 
-	// Add to queue
-	ghDialogueQ = AddtoQueue( ghDialogueQ, &QItem );
-
-
+	ghDialogueQ->Add(QItem);
 	return( TRUE );
 }
 
