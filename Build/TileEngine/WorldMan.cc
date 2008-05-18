@@ -835,13 +835,19 @@ BOOLEAN RemoveAllStructsOfTypeRange(UINT32 iMapIndex, UINT32 fStartType, UINT32 
 	// Look through all structs and Search for type
 	for (const LEVELNODE* pStruct = gpWorldLevelData[iMapIndex].pStructHead; pStruct != NULL;)
 	{
+		if (pStruct->uiFlags & LEVELNODE_CACHEDANITILE)
+		{
+			pStruct = pStruct->pNext;
+			continue;
+		}
+
 		if (pStruct->usIndex != NO_TILE)
 		{
 			const UINT32 fTileType = GetTileType(pStruct->usIndex);
 
 			// Advance to next
 			const LEVELNODE* pOldStruct = pStruct;
-			pStruct = pStruct->pNext;
+			pStruct = pStruct->pNext; // XXX TODO0009 if pStruct->usIndex == NO_TILE this is an endless loop
 
 			if (fTileType >= fStartType && fTileType <= fEndType)
 			{
