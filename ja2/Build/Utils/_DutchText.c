@@ -2339,7 +2339,6 @@ const wchar_t* pWebPagesTitles[] =
 	L"Contract",
 	L"Opmerkingen",
 	L"McGillicutty's Mortuarium",
-	L"",
 	L"URL niet gevonden.",
 	L"Bobby Ray's - Recentelijke Zendingen",
 	L"",

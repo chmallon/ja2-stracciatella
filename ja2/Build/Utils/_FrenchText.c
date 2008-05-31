@@ -2327,7 +2327,6 @@ const wchar_t* pWebPagesTitles[] =
 	L"Contrat",
 	L"Commentaires",
 	L"Morgue McGillicutty",
-	L"",
 	L"URL introuvable.",
 	L"Bobby Ray - Dernières commandes",
 	L"",

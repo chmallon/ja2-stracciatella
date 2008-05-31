@@ -2324,7 +2324,6 @@ const wchar_t* pWebPagesTitles[] =
 	L"Contratto",
 	L"Commenti",
 	L"Servizio di pompe funebri di McGillicutty",
-	L"",
 	L"URL non ritrovato.",
 	L"Bobby Ray - Spedizioni recenti",
 	L"",
