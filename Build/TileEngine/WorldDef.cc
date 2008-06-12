@@ -213,7 +213,7 @@ void DeinitializeWorld( )
 static void AddTileSurface(char const* Filename, UINT32 ubType, UINT8 ubTilesetID);
 
 
-static BOOLEAN LoadTileSurfaces(char ppTileSurfaceFilenames[][32], UINT8 ubTilesetID)
+static void LoadTileSurfaces(char ppTileSurfaceFilenames[][32], UINT8 ubTilesetID)
 try
 {
 	UINT32					uiLoop;
@@ -259,13 +259,11 @@ try
 		sprintf(AdjustedFilename, "TILESETS/%d/%s", tileset_to_add, filename);
 		AddTileSurface(AdjustedFilename, uiLoop, tileset_to_add);
 	}
-
-	return( TRUE );
 }
 catch (...)
 {
 	DestroyTileSurfaces();
-	return FALSE;
+	throw;
 }
 
 
@@ -3011,6 +3009,7 @@ static void TrashMapTile(const INT16 MapTile)
 
 
 BOOLEAN LoadMapTileset( INT32 iTilesetID )
+try
 {
 
 	if ( iTilesetID >= NUM_TILESETS )
@@ -3030,7 +3029,7 @@ BOOLEAN LoadMapTileset( INT32 iTilesetID )
 	gSurfaceMemUsage = guiMemTotal;
 
 	// LOAD SURFACES
-	CHECKF(LoadTileSurfaces(&gTilesets[iTilesetID].TileSurfaceFilenames[0], iTilesetID));
+	LoadTileSurfaces(&gTilesets[iTilesetID].TileSurfaceFilenames[0], iTilesetID);
 
 	// SET TERRAIN COSTS
 	if ( gTilesets[ iTilesetID ].MovementCostFnc != NULL )
@@ -3053,6 +3052,7 @@ BOOLEAN LoadMapTileset( INT32 iTilesetID )
 
 	return( TRUE );
 }
+catch (...) { return FALSE; }
 
 
 static void AddWireFrame(INT16 sGridNo, UINT16 usIndex, BOOLEAN fForced)
