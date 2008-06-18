@@ -419,6 +419,7 @@ void mprintfEditor(INT16 x, INT16 y, const wchar_t* pFontString, ...)
 	uiStringLength = StringPixLength( string, FontDefault );
 	uiStringHeight = GetFontHeight( FontDefault );
 
+	y += SCREEN_HEIGHT - 120;
 	ClearTaskbarRegion( x, y, (INT16)(x+uiStringLength), (INT16)(y+uiStringHeight) );
 	MPrint(x, y, string);
 }
@@ -829,7 +830,7 @@ static void RenderEditorInfo(void)
 		swprintf(FPSText, lengthof(FPSText), L"   (%d)   ", iMapIndex);
 	else
 		swprintf(FPSText, lengthof(FPSText), L"          ");
-	mprintfEditor(50 - StringPixLength(FPSText, FONT12POINT1) / 2, 463, FPSText);
+	mprintfEditor(50 - StringPixLength(FPSText, FONT12POINT1) / 2, 103, FPSText);
 
 	switch( iCurrentTaskbar )
 	{
