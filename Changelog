@@ -1,3 +1,5 @@
+(r4832) Fix error in r1643, which lead to a null-pointer access in the personnel screen, when there are mercs with some stat values of 0.
+
 v0.7 - 2007-10-21 - Cinnamon
 (r1581) Enable scrolling with the mouse wheel for sliders (volume sliders in the options menu), the message log box in the map screen and the inventory list in the personnel screen.
 (r1580) Add support for the mouse wheel.
