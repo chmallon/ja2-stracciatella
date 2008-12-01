@@ -333,18 +333,17 @@ static void RemoveIndexFromSkillsList(INT32 iIndex)
 }
 
 
-static void RemoveSkillFromSkillsList(INT32 Skill)
+static void RemoveSkillFromSkillsList(INT32 const Skill)
 {
-	size_t d = 0;
-	for (size_t s = 0; s < iLastElementInSkillsList; s++)
+	for (size_t i = 0; i != iLastElementInSkillsList;)
 	{
-		if (SkillsList[s] == Skill)
+		if (SkillsList[i] == Skill)
 		{
-			iLastElementInSkillsList--;
+			SkillsList[i] = SkillsList[--iLastElementInSkillsList];
 		}
 		else
 		{
-			SkillsList[d++] = SkillsList[s];
+			++i;
 		}
 	}
 }
