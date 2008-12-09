@@ -1334,7 +1334,7 @@ static INT32 GetNumberOfHistoryPages(void)
 	const HWFILE f = FileOpen(HISTORY_DATA_FILE, FILE_ACCESS_READ);
 	if (!f) return 1;
 
-	const UINT32 uiFileSize = FileGetSize(f) - 1;
+	const UINT32 uiFileSize = FileGetSize(f);
 	FileClose(f);
 
 	if (uiFileSize == 0) return 1;
