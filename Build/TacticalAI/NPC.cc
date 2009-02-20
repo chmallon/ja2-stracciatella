@@ -145,13 +145,7 @@ static void ConditionalExtractNPCQuoteInfoArrayFromFile(HWFILE const f, NPCQuote
 {
 	UINT8 present;
 	FileRead(f, &present, sizeof(present));
-
-	if (q)
-	{
-		MemFree(q);
-		q = 0;
-	}
-
+	FreeNull(q);
 	if (!present) return;
 	q = ExtractNPCQuoteInfoArrayFromFile(f);
 }
@@ -335,8 +329,7 @@ static bool ReloadQuoteFileIfLoaded(UINT8 const ubNPC)
 {
 	NPCQuoteInfo*& q = gpNPCQuoteInfoArray[ubNPC];
 	if (!q) return TRUE;
-	MemFree(q);
-	q = 0;
+	FreeNull(q);
 	return EnsureQuoteFileLoaded(ubNPC);
 }
 
@@ -420,8 +413,7 @@ try
 {
 	NPCQuoteInfo*& q = gpCivQuoteInfoArray[idx];
 	if (!q) return true;
-	MemFree(q);
-	q = 0;
+	FreeNull(q);
 	q = LoadCivQuoteFile(idx);
 	return true;
 }
@@ -434,28 +426,14 @@ void ShutdownNPCQuotes( void )
 
 	for ( ubLoop = 0; ubLoop < NUM_PROFILES; ubLoop++ )
 	{
-		if ( gpNPCQuoteInfoArray[ ubLoop ] )
-		{
-			MemFree( gpNPCQuoteInfoArray[ ubLoop ] );
-			gpNPCQuoteInfoArray[ ubLoop ] = NULL;
-		}
-
-		if ( gpBackupNPCQuoteInfoArray[ ubLoop ] != NULL )
-		{
-			MemFree( gpBackupNPCQuoteInfoArray[ ubLoop ] );
-			gpBackupNPCQuoteInfoArray[ ubLoop ] = NULL;
-		}
-
+		FreeNull(gpNPCQuoteInfoArray[ubLoop]);
+		FreeNull(gpBackupNPCQuoteInfoArray[ubLoop]);
 	}
 
 
 	for ( ubLoop = 0; ubLoop < NUM_CIVQUOTE_SECTORS; ubLoop++ )
 	{
-		if ( gpCivQuoteInfoArray[ ubLoop ] )
-		{
-			MemFree( gpCivQuoteInfoArray[ ubLoop ] );
-			gpCivQuoteInfoArray[ ubLoop ] = NULL;
-		}
+		FreeNull(gpCivQuoteInfoArray[ubLoop]);
 	}
 }
 
@@ -470,11 +448,7 @@ void ReloadAllQuoteFiles(void)
 	for ( ubProfile = FIRST_RPC; ubProfile < NUM_PROFILES; ubProfile++ )
 	{
 		// zap backup if any
-		if ( gpBackupNPCQuoteInfoArray[ ubProfile ] != NULL )
-		{
-			MemFree( gpBackupNPCQuoteInfoArray[ ubProfile ] );
-			gpBackupNPCQuoteInfoArray[ ubProfile ] = NULL;
-		}
+		FreeNull(gpBackupNPCQuoteInfoArray[ubProfile]);
 		ReloadQuoteFileIfLoaded( ubProfile );
 	}
 	// reload all civ quote files
