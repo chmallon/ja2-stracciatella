@@ -264,9 +264,9 @@ static void BackupOriginalQuoteFile(UINT8 ubNPC)
 }
 
 
-static BOOLEAN EnsureQuoteFileLoaded(UINT8 const ubNPC)
+static NPCQuoteInfo* EnsureQuoteFileLoaded(UINT8 const ubNPC)
 {
-	if (ubNPC == ROBOT) return FALSE;
+	if (ubNPC == ROBOT) return 0;
 
 	NPCQuoteInfo*& q         = gpNPCQuoteInfoArray[ubNPC];
 	bool           load_file = !q;
@@ -298,22 +298,21 @@ static BOOLEAN EnsureQuoteFileLoaded(UINT8 const ubNPC)
 	if (load_file)
 	{
 		q = LoadQuoteFile(ubNPC);
+#ifdef JA2TESTVERSION
 		if (!q)
 		{
-#ifdef JA2TESTVERSION
 			if (!gfTriedToLoadQuoteInfoArray[ubNPC]) // don't report the error a second time
 			{
 
 				ScreenMsg( MSG_FONT_RED, MSG_DEBUG, L"ERROR: NPC.C - NPC needs NPC file: %d.", ubNPC );
 				gfTriedToLoadQuoteInfoArray[ubNPC] = TRUE;
 			}
-#endif
 			// error message at this point!
-			return FALSE;
 		}
+#endif
 	}
 
-	return TRUE;
+	return q;
 }
 
 
@@ -456,10 +455,9 @@ void ReloadAllQuoteFiles(void)
 
 void SetQuoteRecordAsUsed( UINT8 ubNPC, UINT8 ubRecord )
 {
-	if ( EnsureQuoteFileLoaded( ubNPC ) )
-	{
-		gpNPCQuoteInfoArray[ ubNPC ][ ubRecord ].fFlags |= QUOTE_FLAG_SAID;
-	}
+	NPCQuoteInfo* const quotes = EnsureQuoteFileLoaded(ubNPC);
+	if (!quotes) return;
+	quotes[ubRecord].fFlags |= QUOTE_FLAG_SAID;
 }
 
 
@@ -1383,8 +1381,8 @@ static void ReplaceLocationInNPCData(NPCQuoteInfo* pNPCQuoteInfoArray, INT16 sOl
 
 void ReplaceLocationInNPCDataFromProfileID(UINT8 const ubNPC, INT16 const sOldGridNo, INT16 const sNewGridNo)
 {
-	if (!EnsureQuoteFileLoaded(ubNPC)) return; // error
-	NPCQuoteInfo* const quotes = gpNPCQuoteInfoArray[ubNPC];
+	NPCQuoteInfo* const quotes = EnsureQuoteFileLoaded(ubNPC);
+	if (!quotes) return; // error
 	ReplaceLocationInNPCData(quotes, sOldGridNo, sNewGridNo);
 }
 
@@ -1402,11 +1400,14 @@ static void ResetOncePerConvoRecords(NPCQuoteInfo* pNPCQuoteInfoArray)
 	}
 }
 
+
 void ResetOncePerConvoRecordsForNPC( UINT8 ubNPC )
 {
-	if (!EnsureQuoteFileLoaded(ubNPC)) return; // error
-	ResetOncePerConvoRecords( gpNPCQuoteInfoArray[ ubNPC ] );
+	NPCQuoteInfo* const quotes = EnsureQuoteFileLoaded(ubNPC);
+	if (!quotes) return; // error
+	ResetOncePerConvoRecords(quotes);
 }
+
 
 void ResetOncePerConvoRecordsForAllNPCsInLoadedSector( void )
 {
@@ -1459,7 +1460,6 @@ void Converse( UINT8 ubNPC, UINT8 ubMerc, INT8 bApproach, UINT32 uiApproachData 
 {
 	NPCQuoteInfo					QuoteInfo;
 	NPCQuoteInfo *				pQuotePtr = &(QuoteInfo);
-	NPCQuoteInfo *				pNPCQuoteInfoArray=NULL;
 	MERCPROFILESTRUCT *		pProfile=NULL;
 	UINT8									ubLoop, ubQuoteNum, ubRecordNum;
 	UINT32								uiDay;
@@ -1493,17 +1493,15 @@ void Converse( UINT8 ubNPC, UINT8 ubMerc, INT8 bApproach, UINT32 uiApproachData 
 		pNPC->fAIFlags &= (~AI_ASLEEP);
 	}
 
-	if (!EnsureQuoteFileLoaded(ubNPC))
-	{
-		// error!!!
-
+	NPCQuoteInfo* const pNPCQuoteInfoArray = EnsureQuoteFileLoaded(ubNPC);
+	if (!pNPCQuoteInfoArray)
+	{ // error!!!
 		if ( fAttemptingToGiveItem )
 		{
 			ReturnItemToPlayerIfNecessary( ubMerc, bApproach, uiApproachData, NULL );
 		}
 		return;
 	}
-	pNPCQuoteInfoArray = gpNPCQuoteInfoArray[ubNPC];
 
 	pProfile = &(gMercProfiles[ubNPC]);
 	switch( bApproach )
@@ -2069,9 +2067,9 @@ void Converse( UINT8 ubNPC, UINT8 ubMerc, INT8 bApproach, UINT32 uiApproachData 
 
 INT16 NPCConsiderInitiatingConv(const SOLDIERTYPE* const pNPC)
 {
-	const UINT8 ubNPC = pNPC->ubProfile;
-	if (!EnsureQuoteFileLoaded(ubNPC)) return NOWHERE; // error
-	NPCQuoteInfo* const pNPCQuoteInfoArray = gpNPCQuoteInfoArray[ubNPC];
+	UINT8         const ubNPC              = pNPC->ubProfile;
+	NPCQuoteInfo* const pNPCQuoteInfoArray = EnsureQuoteFileLoaded(ubNPC);
+	if (!pNPCQuoteInfoArray) return NOWHERE; // error
 
 	const INT16  sMyGridNo           = pNPC->sGridNo;
 	INT16        sDesiredMercDist    = 100;
@@ -2126,7 +2124,6 @@ void NPCReachedDestination( SOLDIERTYPE * pNPC, BOOLEAN fAlreadyThere )
 	// perform action or whatever after reaching our destination
 	UINT8		ubNPC;
 	NPCQuoteInfo *				pQuotePtr;
-	NPCQuoteInfo *				pNPCQuoteInfoArray;
 	UINT8									ubLoop;
 	UINT8									ubQuoteRecord;
 
@@ -2150,9 +2147,9 @@ void NPCReachedDestination( SOLDIERTYPE * pNPC, BOOLEAN fAlreadyThere )
 	}
 
 	ubNPC = pNPC->ubProfile;
-	if (!EnsureQuoteFileLoaded(ubNPC)) return; // error
+	NPCQuoteInfo* const pNPCQuoteInfoArray = EnsureQuoteFileLoaded(ubNPC);
+	if (!pNPCQuoteInfoArray) return; // error
 
-	pNPCQuoteInfoArray = gpNPCQuoteInfoArray[ubNPC];
 	pQuotePtr = &(pNPCQuoteInfoArray[ubQuoteRecord]);
 	// either we are supposed to consider a new quote record
 	// (indicated by a negative gridno in the has-item field)
@@ -2192,17 +2189,17 @@ void NPCReachedDestination( SOLDIERTYPE * pNPC, BOOLEAN fAlreadyThere )
 void TriggerNPCRecord( UINT8 ubTriggerNPC, UINT8 ubTriggerNPCRec )
 {
 	// Check if we have a quote to trigger...
-	NPCQuoteInfo *pQuotePtr;
 	BOOLEAN      fDisplayDialogue = TRUE;
 
-	if (!EnsureQuoteFileLoaded(ubTriggerNPC)) return; // error
-	pQuotePtr = &(gpNPCQuoteInfoArray[ ubTriggerNPC ][ ubTriggerNPCRec ]);
+	NPCQuoteInfo* const quotes = EnsureQuoteFileLoaded(ubTriggerNPC);
+	if (!quotes) return; // error
+	NPCQuoteInfo* const pQuotePtr = &quotes[ubTriggerNPCRec];
 	if ( pQuotePtr->ubQuoteNum == IRRELEVANT )
 	{
 		fDisplayDialogue = FALSE;
 	}
 
-	if ( NPCConsiderQuote( ubTriggerNPC, 0, TRIGGER_NPC, ubTriggerNPCRec, 0, gpNPCQuoteInfoArray[ ubTriggerNPC ] ) )
+	if (NPCConsiderQuote(ubTriggerNPC, 0, TRIGGER_NPC, ubTriggerNPCRec, 0, quotes))
 	{
 		NPCTriggerNPC( ubTriggerNPC, ubTriggerNPCRec, TRIGGER_NPC, fDisplayDialogue );
 	}
@@ -2216,18 +2213,17 @@ void TriggerNPCRecord( UINT8 ubTriggerNPC, UINT8 ubTriggerNPCRec )
 void TriggerNPCRecordImmediately( UINT8 ubTriggerNPC, UINT8 ubTriggerNPCRec )
 {
 	// Check if we have a quote to trigger...
-	NPCQuoteInfo *pQuotePtr;
 	BOOLEAN      fDisplayDialogue = TRUE;
 
-	if (!EnsureQuoteFileLoaded(ubTriggerNPC)) return; // error
-	pQuotePtr = &(gpNPCQuoteInfoArray[ ubTriggerNPC ][ ubTriggerNPCRec ]);
+	NPCQuoteInfo* const quotes = EnsureQuoteFileLoaded(ubTriggerNPC);
+	if (!quotes) return; // error
+	NPCQuoteInfo* const pQuotePtr = &quotes[ubTriggerNPCRec];
 	if ( pQuotePtr->ubQuoteNum == IRRELEVANT )
 	{
 		fDisplayDialogue = FALSE;
 	}
 
-
-	if ( NPCConsiderQuote( ubTriggerNPC, 0, TRIGGER_NPC, ubTriggerNPCRec, 0, gpNPCQuoteInfoArray[ ubTriggerNPC ] ) )
+	if (NPCConsiderQuote(ubTriggerNPC, 0, TRIGGER_NPC, ubTriggerNPCRec, 0, quotes))
 	{
 		// trigger IMMEDIATELY
 		HandleNPCTriggerNPC( ubTriggerNPC, ubTriggerNPCRec, fDisplayDialogue, TRIGGER_NPC );
@@ -2243,12 +2239,10 @@ void TriggerNPCRecordImmediately( UINT8 ubTriggerNPC, UINT8 ubTriggerNPCRec )
 void PCsNearNPC( UINT8 ubNPC )
 {
 	UINT8									ubLoop;
-	NPCQuoteInfo *				pNPCQuoteInfoArray;
 	NPCQuoteInfo *				pQuotePtr;
 
-
-	if (!EnsureQuoteFileLoaded(ubNPC)) return; // error
-	pNPCQuoteInfoArray = gpNPCQuoteInfoArray[ubNPC];
+	NPCQuoteInfo* const pNPCQuoteInfoArray = EnsureQuoteFileLoaded(ubNPC);
+	if (!pNPCQuoteInfoArray) return; // error
 
 	// see what this triggers...
 	SetFactTrue( FACT_PC_NEAR );
@@ -2279,11 +2273,10 @@ void PCsNearNPC( UINT8 ubNPC )
 BOOLEAN PCDoesFirstAidOnNPC( UINT8 ubNPC )
 {
 	UINT8									ubLoop;
-	NPCQuoteInfo *				pNPCQuoteInfoArray;
 	NPCQuoteInfo *				pQuotePtr;
 
-	if (!EnsureQuoteFileLoaded(ubNPC)) return FALSE; // error
-	pNPCQuoteInfoArray = gpNPCQuoteInfoArray[ubNPC];
+	NPCQuoteInfo* const pNPCQuoteInfoArray = EnsureQuoteFileLoaded(ubNPC);
+	if (!pNPCQuoteInfoArray) return FALSE; // error
 
 	SOLDIERTYPE* const pSoldier = FindSoldierByProfileID(ubNPC);
 	// Clear values!
@@ -2352,13 +2345,11 @@ static void TriggerClosestMercWhoCanSeeNPC(UINT8 ubNPC, NPCQuoteInfo* pQuotePtr)
 BOOLEAN TriggerNPCWithIHateYouQuote( UINT8 ubTriggerNPC )
 {
 	// Check if we have a quote to trigger...
-	NPCQuoteInfo *				pNPCQuoteInfoArray;
 	NPCQuoteInfo	*pQuotePtr;
 	UINT8					ubLoop;
 
-	if (!EnsureQuoteFileLoaded(ubTriggerNPC)) return FALSE; // error
-
-	pNPCQuoteInfoArray = gpNPCQuoteInfoArray[ubTriggerNPC];
+	NPCQuoteInfo* const pNPCQuoteInfoArray = EnsureQuoteFileLoaded(ubTriggerNPC);
+	if (!pNPCQuoteInfoArray) return FALSE; // error
 
 	for ( ubLoop = 0; ubLoop < NUM_NPC_QUOTE_RECORDS; ubLoop++ )
 	{
@@ -2380,12 +2371,10 @@ BOOLEAN TriggerNPCWithIHateYouQuote( UINT8 ubTriggerNPC )
 BOOLEAN NPCHasUnusedRecordWithGivenApproach( UINT8 ubNPC, UINT8 ubApproach )
 {
 	// Check if we have a quote that could be used
-	NPCQuoteInfo *				pNPCQuoteInfoArray;
 	UINT8					ubLoop;
 
-	if (!EnsureQuoteFileLoaded(ubNPC)) return FALSE; // error
-
-	pNPCQuoteInfoArray = gpNPCQuoteInfoArray[ubNPC];
+	NPCQuoteInfo* const pNPCQuoteInfoArray = EnsureQuoteFileLoaded(ubNPC);
+	if (!pNPCQuoteInfoArray) return FALSE; // error
 
 	for ( ubLoop = 0; ubLoop < NUM_NPC_QUOTE_RECORDS; ubLoop++ )
 	{
@@ -2402,13 +2391,11 @@ BOOLEAN NPCHasUnusedHostileRecord( UINT8 ubNPC, UINT8 ubApproach )
 	// this is just like the standard check BUT we must skip any
 	// records using fact 289 and print debug msg for any records which can't be marked as used
 	// Check if we have a quote that could be used
-	NPCQuoteInfo *				pNPCQuoteInfoArray;
 	NPCQuoteInfo	*pQuotePtr;
 	UINT8					ubLoop;
 
-	if (!EnsureQuoteFileLoaded(ubNPC)) return FALSE; // error
-
-	pNPCQuoteInfoArray = gpNPCQuoteInfoArray[ubNPC];
+	NPCQuoteInfo* const pNPCQuoteInfoArray = EnsureQuoteFileLoaded(ubNPC);
+	if (!pNPCQuoteInfoArray) return FALSE; // error
 
 	for ( ubLoop = 0; ubLoop < NUM_NPC_QUOTE_RECORDS; ubLoop++ )
 	{
@@ -2435,13 +2422,11 @@ BOOLEAN NPCHasUnusedHostileRecord( UINT8 ubNPC, UINT8 ubApproach )
 BOOLEAN NPCWillingToAcceptItem( UINT8 ubNPC, UINT8 ubMerc, OBJECTTYPE * pObj )
 {
 	// Check if we have a quote that could be used, that applies to this item
-	NPCQuoteInfo *		pNPCQuoteInfoArray;
 	NPCQuoteInfo *		pQuotePtr;
 	UINT8							ubOpinion, ubQuoteNum;
 
-	if (!EnsureQuoteFileLoaded(ubNPC)) return FALSE; // error
-
-	pNPCQuoteInfoArray = gpNPCQuoteInfoArray[ubNPC];
+	NPCQuoteInfo* const pNPCQuoteInfoArray = EnsureQuoteFileLoaded(ubNPC);
+	if (!pNPCQuoteInfoArray) return FALSE; // error
 
 	ubOpinion = NPCConsiderReceivingItemFromMerc( ubNPC, ubMerc, pObj, pNPCQuoteInfoArray, &pQuotePtr, &ubQuoteNum );
 
@@ -2457,12 +2442,10 @@ BOOLEAN NPCWillingToAcceptItem( UINT8 ubNPC, UINT8 ubMerc, OBJECTTYPE * pObj )
 BOOLEAN GetInfoForAbandoningEPC(UINT8 const ubNPC, UINT16* const pusQuoteNum, Fact* const fact_to_set_true)
 {
 	// Check if we have a quote that could be used
-	NPCQuoteInfo *				pNPCQuoteInfoArray;
 	UINT8					ubLoop;
 
-	if (!EnsureQuoteFileLoaded(ubNPC)) return FALSE; // error
-
-	pNPCQuoteInfoArray = gpNPCQuoteInfoArray[ubNPC];
+	NPCQuoteInfo* const pNPCQuoteInfoArray = EnsureQuoteFileLoaded(ubNPC);
+	if (!pNPCQuoteInfoArray) return FALSE; // error
 
 	for ( ubLoop = 0; ubLoop < NUM_NPC_QUOTE_RECORDS; ubLoop++ )
 	{
@@ -2479,13 +2462,11 @@ BOOLEAN GetInfoForAbandoningEPC(UINT8 const ubNPC, UINT16* const pusQuoteNum, Fa
 BOOLEAN TriggerNPCWithGivenApproach( UINT8 ubTriggerNPC, UINT8 ubApproach, BOOLEAN fShowPanel )
 {
 	// Check if we have a quote to trigger...
-	NPCQuoteInfo *				pNPCQuoteInfoArray;
 	NPCQuoteInfo	*pQuotePtr;
 	UINT8					ubLoop;
 
-	if (!EnsureQuoteFileLoaded(ubTriggerNPC)) return FALSE; // error
-
-	pNPCQuoteInfoArray = gpNPCQuoteInfoArray[ubTriggerNPC];
+	NPCQuoteInfo* const pNPCQuoteInfoArray = EnsureQuoteFileLoaded(ubTriggerNPC);
+	if (!pNPCQuoteInfoArray) return FALSE; // error
 
 	for ( ubLoop = 0; ubLoop < NUM_NPC_QUOTE_RECORDS; ubLoop++ )
 	{
@@ -2700,12 +2681,10 @@ void TriggerFriendWithHostileQuote( UINT8 ubNPC )
 UINT8 ActionIDForMovementRecord( UINT8 ubNPC, UINT8 ubRecord )
 {
 	// Check if we have a quote to trigger...
-	NPCQuoteInfo *				pNPCQuoteInfoArray;
 	NPCQuoteInfo	*pQuotePtr;
 
-	if (!EnsureQuoteFileLoaded(ubNPC)) return FALSE; // error
-
-	pNPCQuoteInfoArray = gpNPCQuoteInfoArray[ ubNPC ];
+	NPCQuoteInfo* const pNPCQuoteInfoArray = EnsureQuoteFileLoaded(ubNPC);
+	if (!pNPCQuoteInfoArray) return FALSE; // error
 
 	pQuotePtr = &( pNPCQuoteInfoArray[ ubRecord ] );
 
@@ -2852,24 +2831,19 @@ void UpdateDarrelScriptToGoTo( SOLDIERTYPE * pSoldier )
 		}
 	}
 
-	EnsureQuoteFileLoaded( DARREL );
-	gpNPCQuoteInfoArray[ DARREL ][ 10 ].usGoToGridno = sAdjustedGridNo;
-	gpNPCQuoteInfoArray[ DARREL ][ 11 ].sRequiredGridno = -(sAdjustedGridNo);
-	gpNPCQuoteInfoArray[ DARREL ][ 11 ].ubTriggerNPC = pSoldier->ubProfile;
+	NPCQuoteInfo* const quotes = EnsureQuoteFileLoaded(DARREL);
+	quotes[10].usGoToGridno    = sAdjustedGridNo;
+	quotes[11].sRequiredGridno = -sAdjustedGridNo;
+	quotes[11].ubTriggerNPC    = pSoldier->ubProfile;
 }
 
-BOOLEAN RecordHasDialogue( UINT8 ubNPC, UINT8 ubRecord )
-{
-	if (!EnsureQuoteFileLoaded(ubNPC)) return FALSE; // error
 
-	if ( gpNPCQuoteInfoArray[ ubNPC ][ ubRecord ].ubQuoteNum != NO_QUOTE && gpNPCQuoteInfoArray[ ubNPC ][ ubRecord ].ubQuoteNum != 0 )
-	{
-		return( TRUE );
-	}
-	else
-	{
-		return( FALSE );
-	}
+BOOLEAN RecordHasDialogue(UINT8 const ubNPC, UINT8 const ubRecord)
+{
+	NPCQuoteInfo* const quotes = EnsureQuoteFileLoaded(ubNPC);
+	if (!quotes) return FALSE; // error
+	NPCQuoteInfo const& q = quotes[ubRecord];
+	return q.ubQuoteNum != NO_QUOTE && q.ubQuoteNum != 0;
 }
 
 
