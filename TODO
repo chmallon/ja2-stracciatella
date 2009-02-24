@@ -30,3 +30,4 @@ low prio
 - TODO0012 Is this fix for the infinite loop when throwing right?
 - TODO0013 Code and comment disagree
 - TODO0014 Properly resolve the bReverse mess
+- TODO001D When a merc leaves the helicopter, he is placed in the center of the map. But for the first merc (who creates a new squad) PlaceGroupInSector() is called, which moves him to an edge. The later call to SetSoldierExitHelicopterInsertionData() corrects this. Investigate if this can be simplified (maybe removing the PlaceGroupInSector() is possible)

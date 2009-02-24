@@ -5498,8 +5498,13 @@ static void SquadMenuBtnCallback(MOUSE_REGION* pRegion, INT32 iReason)
 			if ( bCanJoinSquad == CHARACTER_CAN_JOIN_SQUAD )
 			{
 				// able to add, do it
+				SOLDIERTYPE* const s = pSoldier;
+				bool const exiting_helicopter =
+					s->bAssignment == VEHICLE &&
+					s->iVehicleId  == iHelicopterVehicleId;
 				PreChangeAssignment(pSoldier);
 				AddCharacterToSquad( pSoldier, ( INT8 )iValue );
+				if (exiting_helicopter) SetSoldierExitHelicopterInsertionData(s); // XXX TODO001D
 				MakeSoldiersTacticalAnimationReflectAssignment( pSoldier );
 			}
 

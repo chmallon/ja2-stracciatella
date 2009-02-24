@@ -387,22 +387,21 @@ static BOOLEAN AddSoldierToVehicle(SOLDIERTYPE* const pSoldier, VEHICLETYPE* con
 }
 
 
-static void SetSoldierExitVehicleInsertionData(SOLDIERTYPE* const pSoldier, const INT32 iId)
+void SetSoldierExitHelicopterInsertionData(SOLDIERTYPE* const s)
 {
-	if ( iId == iHelicopterVehicleId && !pSoldier->bInSector )
-  {
-	  if( pSoldier->sSectorX  != BOBBYR_SHIPPING_DEST_SECTOR_X || pSoldier->sSectorY != BOBBYR_SHIPPING_DEST_SECTOR_Y || pSoldier->bSectorZ != BOBBYR_SHIPPING_DEST_SECTOR_Z )
-    {
-      // Not anything different here - just use center gridno......
-		  pSoldier->ubStrategicInsertionCode = INSERTION_CODE_CENTER;
-    }
-    else
-    {
-      // This is drassen, make insertion gridno specific...
-		  pSoldier->ubStrategicInsertionCode = INSERTION_CODE_GRIDNO;
-		  pSoldier->usStrategicInsertionData = 10125;
-    }
-  }
+	if (s->bInSector) return;
+
+	if (s->sSectorX == BOBBYR_SHIPPING_DEST_SECTOR_X &&
+			s->sSectorY == BOBBYR_SHIPPING_DEST_SECTOR_Y &&
+			s->bSectorZ == BOBBYR_SHIPPING_DEST_SECTOR_Z)
+	{ // This is Drassen, make insertion gridno specific
+		s->ubStrategicInsertionCode = INSERTION_CODE_GRIDNO;
+		s->usStrategicInsertionData = 10125;
+	}
+	else
+	{ // Not anything different here - just use center gridno
+		s->ubStrategicInsertionCode = INSERTION_CODE_CENTER;
+	}
 }
 
 
@@ -525,7 +524,7 @@ static BOOLEAN RemoveSoldierFromVehicle(SOLDIERTYPE* pSoldier, INT32 iId)
 			SetSectorFlag( pSoldier->sSectorX, pSoldier->sSectorY, pSoldier->bSectorZ, SF_ALREADY_VISITED );
 		}
 
-    SetSoldierExitVehicleInsertionData( pSoldier, iId );
+		SetSoldierExitHelicopterInsertionData(pSoldier);
 
     // Update in sector if this is the current sector.....
 		if ( pSoldier->sSectorX == gWorldSectorX && pSoldier->sSectorY == gWorldSectorY && pSoldier->bSectorZ == gbWorldSectorZ )
