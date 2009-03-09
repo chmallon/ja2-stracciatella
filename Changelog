@@ -1,3 +1,4 @@
+(r5482) Fix a bug in r3969, which prevented reentering a sector after fleeing from a battle there in the Windows version.
 (r3952, r3955, r3957, r3965, r3966, r3967, r3968, r3969) Plug vanilla memory and file leaks (mostly in error handling.
 (r3920) Fix a vanilla string buffer overrun, occuring in the French and Italian translations, when displaying the turn message at the top in combat.
 (r3919) Fix a vanilla bug, which accessed uninitialised data.

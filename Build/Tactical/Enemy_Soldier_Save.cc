@@ -521,6 +521,7 @@ BOOLEAN NewWayOfLoadingEnemySoldiersFromTempFile()
 
 		if( GetWorldTotalMin() > uiTimeStamp + 300 )
 		{ //the file has aged.  Use the regular method for adding soldiers.
+			hFile.Deallocate(); // Close the file before deleting it
 			RemoveEnemySoldierTempFile( sSectorX, sSectorY, bSectorZ );
 			gfRestoringEnemySoldiersFromTempFile = FALSE;
 			return TRUE;
