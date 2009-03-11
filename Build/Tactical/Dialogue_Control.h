@@ -189,7 +189,6 @@ enum DialogueSpecialEvent
 	DIALOGUE_SPECIAL_EVENT_UNSET_ARRIVES_FLAG           = 0x00800000,
 	DIALOGUE_SPECIAL_EVENT_FOR_SOLDIER_UPDATE_BOX       = 0x02000000,
 	DIALOGUE_SPECIAL_EVENT_ENTER_MAPSCREEN              = 0x04000000,
-	DIALOGUE_SPECIAL_EVENT_LOCK_INTERFACE               = 0x08000000,
 	DIALOGUE_SPECIAL_EVENT_CONTRACT_ENDING_NO_ASK_EQUIP = 0x80000000
 };
 
@@ -259,8 +258,6 @@ BOOLEAN DialogueQueueIsEmptyOrSomebodyTalkingNow(void);
 
 // Adjust the face, etc when switching from panel to extern panel...
 void HandleDialogueUIAdjustments(void);
-
-void PauseTimeDuringNextQuote(void);
 
 
 // set up and shutdown static external NPC faces
