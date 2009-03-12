@@ -9161,6 +9161,26 @@ void LockMapScreenInterface(bool const lock, bool const pause)
 }
 
 
+void MakeDialogueEventEnterMapScreen()
+{
+	class DialogueEventEnterMapScreen : public DialogueEvent
+	{
+		public:
+			bool Execute()
+			{
+				if (!(guiTacticalInterfaceFlags & INTERFACE_MAPSCREEN))
+				{
+					gfEnteringMapScreen    = TRUE;
+					fEnterMapDueToContract = TRUE;
+				}
+				return false;
+			}
+	};
+
+	DialogueEvent::Add(new DialogueEventEnterMapScreen());
+}
+
+
 #ifdef JA2DEMO
 void DisabledInDemo(void)
 {
