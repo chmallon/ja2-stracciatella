@@ -2303,7 +2303,8 @@ BOOLEAN LoadSavedGame( UINT8 ubSavedGameID )
 		//Initialize the current panel
 		InitializeCurrentPanel( );
 
-		SelectSoldier(GetSelectedMan(), SELSOLDIER_FORCE_RESELECT);
+		SOLDIERTYPE* const sel = GetSelectedMan();
+		if (sel) SelectSoldier(sel, SELSOLDIER_FORCE_RESELECT);
 	}
 
 	uiRelEndPerc += 1;

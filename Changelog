@@ -1,3 +1,4 @@
+(r5553) Fix a bug in r1791 which caused a null-pointer access when loading a savegame which starts in tactical mode and all mercs are busy.
 (r1650) Fix vanilla rounding errors: The scrollbar in the inventory view of the personnel screen was not positioned correctly and could be moved one beyond the last item.
 
 v0.7 - 2007-10-21 - Cinnamon
