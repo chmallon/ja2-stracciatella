@@ -1,3 +1,5 @@
+* Fix a display bug in v0.8: Restore colons for printing the stats of the robot in the personnel screen.
+
 (r2832) Fix a bug in the sound system: Some sounds are sampled at 44kHz, but the sound system uses 22kHz as playback rate, so resample these sounds before playing.
 (r2678) Fix a crash, which is caused by a vanilla mixup of SoldierID and ProfileID, in the insurance contract screen when there are no insurable mercs.
 (r2609, r2840, r2886) Improve the German translation, especially fix gross vanilla mistranslations for the terms "shooting range" and "hired".
