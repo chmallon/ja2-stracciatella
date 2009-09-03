@@ -1,0 +1,1 @@
+* Fix a bug in v0.1 in the map utils: Zero the memory when allocating a new node for quantisation, otherwise garbage is read.

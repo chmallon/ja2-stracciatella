@@ -107,7 +107,7 @@ NODE* CQuantizer::CreateNode (UINT nLevel, UINT nColorBits, UINT* pLeafCount,
 {
     NODE* pNode;
 
-		pNode = new NODE;
+		pNode = new NODE();
     if (pNode == NULL)
         return NULL;
 
