@@ -72,6 +72,7 @@ void CQuantizer::ProcessImage(const SGPPaletteEntry* pData, const int iWidth, co
 		const BYTE g = pData->peGreen;
 		const BYTE r = pData->peBlue;
 		AddColor(&m_pTree, pData->peRed, pData->peGreen, pData->peBlue, 0);
+		++pData;
 		while (m_nLeafCount > m_nMaxColors) ReduceTree();
 	}
 }
