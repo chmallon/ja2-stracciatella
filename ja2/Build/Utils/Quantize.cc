@@ -32,9 +32,9 @@ BOOLEAN CQuantizer::ProcessImage(BYTE* pData, int iWidth, int iHeight)
     pbBits = (BYTE*)pData;
     for (i=0; i<iHeight; i++) {
         for (j=0; j<iWidth; j++) {
-            b = *pbBits++;
-            g = *pbBits++;
             r = *pbBits++;
+            g = *pbBits++;
+            b = *pbBits++;
             AddColor (&m_pTree, r, g, b, m_nColorBits, 0, &m_nLeafCount,
                 m_pReducibleNodes);
             while (m_nLeafCount > m_nMaxColors)
