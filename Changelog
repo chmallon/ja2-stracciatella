@@ -1,3 +1,5 @@
+* Fix a bug in v0.9, which caused an assertion failure/null-pointer access when removing a dead merc via the contract menu.
+
 (r3598) Fix a vanilla memory leak when loading savegames.
 (r3592) Fix vanilla bugs (different destinations within one squad, combats with no participants) when right clicking the the name, location or destination columns to abort movement planning mode.
 (r3546) Ensure that taking screenshots does not overwrite older screenshots.
