@@ -1,5 +1,5 @@
-CONFIG ?= config.default
--include $(CONFIG)
+CFG ?= default
+-include config.$(CFG)
 
 
 ifeq ($(findstring $(LNG), DUTCH ENGLISH FRENCH GERMAN ITALIAN POLISH RUSSIAN RUSSIAN_GOLD),)
@@ -12,6 +12,7 @@ endif
 
 
 BINARY    ?= ja2
+BUILDDIR  ?= build/$(CFG)
 PREFIX    ?= /usr/local
 MANPREFIX ?= $(PREFIX)
 
@@ -457,41 +458,43 @@ SRCS += src/game/Editor/Smooth.cc
 SRCS += src/game/Editor/Smoothing_Utils.cc
 endif
 
-OBJS = $(filter %.o, $(SRCS:.c=.o) $(SRCS:.cc=.o))
-DEPS = $(OBJS:.o=.d)
+SRCS := $(sort $(SRCS))
+OBJS := $(patsubst %, $(BUILDDIR)/%.o, $(basename $(SRCS)))
+DEPS := $(OBJS:.o=.d)
+DIRS := $(sort $(dir $(OBJS)))
 
-.SUFFIXES:
-.SUFFIXES: .c .cc .d .o
+# Make build directories
+DUMMY := $(shell mkdir -p $(DIRS))
 
 Q ?= @
 
-all: $(BINARY)
+all: $(BUILDDIR)/$(BINARY)
 
 -include $(DEPS)
 
-$(BINARY): $(OBJS)
+$(BUILDDIR)/$(BINARY): $(OBJS)
 	@echo '===> LD $@'
 	$(Q)$(CXX) $(CFLAGS) $(OBJS) $(LDFLAGS) -o $@
 
-.c.o:
+$(BUILDDIR)/%.o: %.c
 	@echo '===> CC $<'
 	$(Q)$(CC) $(CCFLAGS) -c -MP -MMD -o $@ $<
 
-.cc.o:
+$(BUILDDIR)/%.o: %.cc
 	@echo '===> CXX $<'
 	$(Q)$(CXX) $(CXXFLAGS) -c -MP -MMD -o $@ $<
 
 clean distclean:
 	@echo '===> CLEAN'
-	$(Q)rm -fr $(DEPS) $(OBJS) $(BINARY)
+	$(Q)rm -fr $(BUILDDIR)
 
-install: $(BINARY)
+install: $(BUILDDIR)/$(BINARY)
 	@echo '===> INSTALL'
 	$(Q)$(INSTALL) -d $(PREFIX)/bin $(MANPREFIX)/man/man6 $(PREFIX)/share/applications $(PREFIX)/share/pixmaps
-	$(Q)$(INSTALL_PROGRAM) $(BINARY) $(PREFIX)/bin
+	$(Q)$(INSTALL_PROGRAM) $(BUILDDIR)/$(BINARY) $(PREFIX)/bin
 	$(Q)$(INSTALL_MAN) ja2.6 $(MANPREFIX)/man/man6
 	$(Q)$(INSTALL_DATA) ja2-stracciatella.desktop $(PREFIX)/share/applications
-	$(Q)$(INSTALL_DATA) Build/Res/jagged3.ico $(PREFIX)/share/pixmaps/jagged2.ico
+	$(Q)$(INSTALL_DATA) src/Res/jagged3.ico $(PREFIX)/share/pixmaps/jagged2.ico
 
 deinstall:
 	@echo '===> DEINSTALL'
