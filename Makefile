@@ -471,6 +471,9 @@ Q ?= @
 .PHONY: all
 all: $(BUILDDIR)/$(BINARY)
 
+.PHONY: compile
+compile: $(OBJS)
+
 -include $(DEPS)
 
 $(BUILDDIR)/$(BINARY): $(OBJS)
