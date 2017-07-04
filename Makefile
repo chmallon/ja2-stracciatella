@@ -468,6 +468,7 @@ DUMMY := $(shell mkdir -p $(DIRS))
 
 Q ?= @
 
+.PHONY: all
 all: $(BUILDDIR)/$(BINARY)
 
 -include $(DEPS)
@@ -484,10 +485,12 @@ $(BUILDDIR)/%.o: %.cc
 	@echo '===> CXX $<'
 	$(Q)$(CXX) $(CXXFLAGS) -c -MP -MMD -o $@ $<
 
+.PHONY: clean distclean
 clean distclean:
 	@echo '===> CLEAN'
 	$(Q)rm -fr $(BUILDDIR)
 
+.PHONY: install
 install: $(BUILDDIR)/$(BINARY)
 	@echo '===> INSTALL'
 	$(Q)$(INSTALL) -d $(PREFIX)/bin $(MANPREFIX)/man/man6 $(PREFIX)/share/applications $(PREFIX)/share/pixmaps
@@ -496,6 +499,7 @@ install: $(BUILDDIR)/$(BINARY)
 	$(Q)$(INSTALL_DATA) ja2-stracciatella.desktop $(PREFIX)/share/applications
 	$(Q)$(INSTALL_DATA) src/Res/jagged3.ico $(PREFIX)/share/pixmaps/jagged2.ico
 
+.PHONY: deinstall
 deinstall:
 	@echo '===> DEINSTALL'
 	$(Q)rm $(PREFIX)/bin/$(BINARY)
@@ -503,7 +507,7 @@ deinstall:
 	$(Q)rm $(PREFIX)/share/applications/ja2-stracciatella.desktop
 	$(Q)rm $(PREFIX)/share/pixmaps/jagged2.ico
 
-
+.PHONY: lowercase
 lowercase:
 	$(Q)for i in \
 		"$(SGPDATADIR)"/Data/*.[Ss][Ll][Ff] \
