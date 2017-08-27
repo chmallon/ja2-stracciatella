@@ -120,34 +120,6 @@ endif
 SRCS :=
 SRCS += Build/AniViewScreen.cc
 SRCS += Build/Credits.cc
-
-ifdef JA2EDITOR
-SRCS += Build/Editor/Cursor_Modes.cc
-SRCS += Build/Editor/EditScreen.cc
-SRCS += Build/Editor/Edit_Sys.cc
-SRCS += Build/Editor/EditorBuildings.cc
-SRCS += Build/Editor/EditorItems.cc
-SRCS += Build/Editor/EditorMapInfo.cc
-SRCS += Build/Editor/EditorMercs.cc
-SRCS += Build/Editor/EditorTerrain.cc
-SRCS += Build/Editor/Editor_Callbacks.cc
-SRCS += Build/Editor/Editor_Modes.cc
-SRCS += Build/Editor/Editor_Taskbar_Creation.cc
-SRCS += Build/Editor/Editor_Taskbar_Utils.cc
-SRCS += Build/Editor/Editor_Undo.cc
-SRCS += Build/Editor/Item_Statistics.cc
-SRCS += Build/Editor/LoadScreen.cc
-SRCS += Build/Editor/MessageBox.cc
-SRCS += Build/Editor/NewSmooth.cc
-SRCS += Build/Editor/PopupMenu.cc
-SRCS += Build/Editor/Road_Smoothing.cc
-SRCS += Build/Editor/Sector_Summary.cc
-SRCS += Build/Editor/SelectWin.cc
-SRCS += Build/Editor/SmartMethod.cc
-SRCS += Build/Editor/Smooth.cc
-SRCS += Build/Editor/Smoothing_Utils.cc
-endif
-
 SRCS += Build/Fade_Screen.cc
 SRCS += Build/GameInitOptionsScreen.cc
 SRCS += Build/GameLoop.cc
@@ -417,6 +389,16 @@ SRCS += Build/Utils/Text_Utils.cc
 SRCS += Build/Utils/Timer_Control.cc
 SRCS += Build/Utils/Utilities.cc
 SRCS += Build/Utils/WordWrap.cc
+SRCS += Build/Utils/_DutchText.cc
+SRCS += Build/Utils/_EnglishText.cc
+SRCS += Build/Utils/_FrenchText.cc
+SRCS += Build/Utils/_GermanText.cc
+SRCS += Build/Utils/_ItalianText.cc
+SRCS += Build/Utils/_JA25EnglishText.cc
+SRCS += Build/Utils/_JA25GermanText.cc
+SRCS += Build/Utils/_JA25RussianText.cc
+SRCS += Build/Utils/_PolishText.cc
+SRCS += Build/Utils/_RussianText.cc
 SRCS += sgp/Button_Sound_Control.cc
 SRCS += sgp/Button_System.cc
 SRCS += sgp/Config.cc
@@ -446,19 +428,32 @@ SRCS += sgp/VObject_Blitters.cc
 SRCS += sgp/VSurface.cc
 SRCS += sgp/Video.cc
 
-LNGS :=
-LNGS += Build/Utils/_DutchText.cc
-LNGS += Build/Utils/_EnglishText.cc
-LNGS += Build/Utils/_FrenchText.cc
-LNGS += Build/Utils/_GermanText.cc
-LNGS += Build/Utils/_ItalianText.cc
-LNGS += Build/Utils/_JA25EnglishText.cc
-LNGS += Build/Utils/_JA25GermanText.cc
-LNGS += Build/Utils/_JA25RussianText.cc
-LNGS += Build/Utils/_PolishText.cc
-LNGS += Build/Utils/_RussianText.cc
-
-SRCS += $(LNGS)
+ifdef JA2EDITOR
+SRCS += Build/Editor/Cursor_Modes.cc
+SRCS += Build/Editor/EditScreen.cc
+SRCS += Build/Editor/Edit_Sys.cc
+SRCS += Build/Editor/EditorBuildings.cc
+SRCS += Build/Editor/EditorItems.cc
+SRCS += Build/Editor/EditorMapInfo.cc
+SRCS += Build/Editor/EditorMercs.cc
+SRCS += Build/Editor/EditorTerrain.cc
+SRCS += Build/Editor/Editor_Callbacks.cc
+SRCS += Build/Editor/Editor_Modes.cc
+SRCS += Build/Editor/Editor_Taskbar_Creation.cc
+SRCS += Build/Editor/Editor_Taskbar_Utils.cc
+SRCS += Build/Editor/Editor_Undo.cc
+SRCS += Build/Editor/Item_Statistics.cc
+SRCS += Build/Editor/LoadScreen.cc
+SRCS += Build/Editor/MessageBox.cc
+SRCS += Build/Editor/NewSmooth.cc
+SRCS += Build/Editor/PopupMenu.cc
+SRCS += Build/Editor/Road_Smoothing.cc
+SRCS += Build/Editor/Sector_Summary.cc
+SRCS += Build/Editor/SelectWin.cc
+SRCS += Build/Editor/SmartMethod.cc
+SRCS += Build/Editor/Smooth.cc
+SRCS += Build/Editor/Smoothing_Utils.cc
+endif
 
 OBJS = $(filter %.o, $(SRCS:.c=.o) $(SRCS:.cc=.o))
 DEPS = $(OBJS:.o=.d)
