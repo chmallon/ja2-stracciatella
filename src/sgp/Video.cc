@@ -420,14 +420,7 @@ static void ScrollJA2Background(INT16 sScrollXIncrement, INT16 sScrollYIncrement
 	// BLIT NEW
 	ExecuteVideoOverlaysToAlternateBuffer(BACKBUFFER);
 
-	SDL_UpdateRect
-	(
-		Dest,
-		gsVIEWPORT_START_X,
-		gsVIEWPORT_WINDOW_START_Y,
-		gsVIEWPORT_END_X - gsVIEWPORT_START_X,
-		gsVIEWPORT_WINDOW_END_Y - gsVIEWPORT_WINDOW_START_Y
-	);
+	InvalidateRegion(gsVIEWPORT_START_X, gsVIEWPORT_WINDOW_START_Y, gsVIEWPORT_END_X, gsVIEWPORT_WINDOW_END_Y);
 }
 
 
@@ -553,6 +546,17 @@ void RefreshScreen(void)
 		}
 		else
 		{
+			if (!gfForceFullScreenRefresh)
+			{
+				for (UINT32 i = 0; i < guiDirtyRegionExCount; i++)
+				{
+					auto const& r = DirtyRegionsEx[i];
+					// Check if we are completely out of bounds
+					if (!scrolling || r.y > gsVIEWPORT_WINDOW_END_Y || r.y + r.h > gsVIEWPORT_WINDOW_END_Y)
+						InvalidateRegion(r.x, r.y, r.x + r.w, r.y + r.h);
+				}
+			}
+
 			if (gfForceFullScreenRefresh)
 			{
 				SDL_BlitSurface(FrameBuffer, NULL, ScreenBuffer, NULL);
@@ -562,20 +566,6 @@ void RefreshScreen(void)
 				for (UINT32 i = 0; i < guiDirtyRegionCount; i++)
 				{
 					SDL_BlitSurface(FrameBuffer, &DirtyRegions[i], ScreenBuffer, &DirtyRegions[i]);
-				}
-
-				for (UINT32 i = 0; i < guiDirtyRegionExCount; i++)
-				{
-					SDL_Rect* r = &DirtyRegionsEx[i];
-					if (scrolling)
-					{
-						// Check if we are completely out of bounds
-						if (r->y <= gsVIEWPORT_WINDOW_END_Y && r->y + r->h <= gsVIEWPORT_WINDOW_END_Y)
-						{
-							continue;
-						}
-					}
-					SDL_BlitSurface(FrameBuffer, r, ScreenBuffer, r);
 				}
 			}
 		}
@@ -616,8 +606,8 @@ void RefreshScreen(void)
 	dst.x = MousePos.iX - gsMouseCursorXOffset;
 	dst.y = MousePos.iY - gsMouseCursorYOffset;
 	SDL_BlitSurface(MouseCursor, &src, ScreenBuffer, &dst);
-	SDL_UpdateRects(ScreenBuffer, 1, &dst);
-	SDL_UpdateRects(ScreenBuffer, 1, &MouseBackground);
+	InvalidateRegion(dst.x, dst.y, dst.x + dst.w, dst.y + dst.h);
+	InvalidateRegion(MouseBackground.x, MouseBackground.y, MouseBackground.x + MouseBackground.w, MouseBackground.y + MouseBackground.h);
 	MouseBackground = dst;
 
 	if (gfForceFullScreenRefresh)
@@ -627,19 +617,6 @@ void RefreshScreen(void)
 	else
 	{
 		SDL_UpdateRects(ScreenBuffer, guiDirtyRegionCount, DirtyRegions);
-
-		for (UINT32 i = 0; i < guiDirtyRegionExCount; i++)
-		{
-			SDL_Rect* r = &DirtyRegionsEx[i];
-			if (scrolling)
-			{
-				if (r->y <= gsVIEWPORT_WINDOW_END_Y && r->y + r->h <= gsVIEWPORT_WINDOW_END_Y)
-				{
-					continue;
-				}
-			}
-			SDL_UpdateRects(ScreenBuffer, 1, r);
-		}
 	}
 
 	gfForceFullScreenRefresh = FALSE;
