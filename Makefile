@@ -478,11 +478,11 @@ $(BINARY): $(OBJS)
 
 .c.o:
 	@echo '===> CC $<'
-	$(Q)$(CC) $(CCFLAGS) -c -MMD -o $@ $<
+	$(Q)$(CC) $(CCFLAGS) -c -MP -MMD -o $@ $<
 
 .cc.o:
 	@echo '===> CXX $<'
-	$(Q)$(CXX) $(CXXFLAGS) -c -MMD -o $@ $<
+	$(Q)$(CXX) $(CXXFLAGS) -c -MP -MMD -o $@ $<
 
 clean distclean:
 	@echo '===> CLEAN'
