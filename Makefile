@@ -109,6 +109,7 @@ CCFLAGS += -Werror-implicit-function-declaration
 CCFLAGS += -Wimplicit-int
 CCFLAGS += -Wmissing-prototypes
 
+CXXFLAGS += -std=c++14 -Wno-narrowing
 CXXFLAGS += $(CFLAGS)
 
 LDFLAGS += $(LDFLAGS_SDL)
