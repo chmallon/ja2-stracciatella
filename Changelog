@@ -1,3 +1,4 @@
+* Fix a display bug in v0.8: Restore colons for printing the stats of the robot in the personnel screen.
 * Fix slow rendering on platforms where SDL_UpdateRects() is expensive, e.g. OS X.
 
 v0.12.1 - 2009-06-15
