@@ -1,3 +1,4 @@
+* Fix a glitch in v0.11: The yes/no buttons in the email delete window could not be clicked, when the email had more than one page.
 * Fix a bug in v0.9, which caused an assertion failure/null-pointer access when removing a dead merc via the contract menu.
 * Fix a bug in v0.4 in the map utils: When quantising an image the red and blue colour channels were swapped in ProcessImage().
 * Fix a bug in v0.9 in the map utils: Advancing the data pointer was lost.
