@@ -1342,7 +1342,7 @@ static BOOLEAN ValidAttachmentClass(UINT16 usAttachment, UINT16 usItem)
 		// see comment for AttachmentInfo array for why we skip IC_NONE
 		if (i->uiItemClass == IC_NONE) continue;
 
-		if (i->usItem == usAttachment && i->uiItemClass == Item->usItemClass)
+		if (i->usItem == usAttachment && i->uiItemClass == Item[usItem].usItemClass)
 		{
 			return TRUE;
 		}
